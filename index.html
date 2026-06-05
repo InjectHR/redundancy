@@ -1,563 +1,2687 @@
-<!DOCTYPE html>
-<html lang="en-AU">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Salary, Hourly Rate and Award Comparison Calculator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Managing Redundancy Fairly and Practically</title>
   <style>
     :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --ink: #172033;
-      --muted: #617089;
-      --line: #dce2ee;
-      --accent: #355cff;
-      --accent-dark: #213fc2;
-      --good: #0f7b45;
-      --warn: #b45309;
-      --bad: #b42318;
-      --soft: #eef2ff;
-      --shadow: 0 14px 40px rgba(23, 32, 51, 0.08);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --ink: #20201d;
+      --muted: #5f6668;
+      --line: #d8dddc;
+      --paper: #eef2f1;
+      --surface: #fbfcfb;
+      --accent: #0f766e;
+      --accent-dark: #0b544f;
+      --warn: #9a5a16;
+      --success: #1e6b43;
+      --shadow: 0 18px 48px rgba(32, 40, 41, 0.12);
+      --radius: 8px;
+      --sidebar: 292px;
     }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: linear-gradient(135deg, #f7f8ff 0%, #eef4f8 100%); color: var(--ink); min-height: 100vh; }
-    header { max-width: 1240px; margin: 0 auto; padding: 38px 20px 12px; }
-    h1 { margin: 0 0 12px; font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.05; letter-spacing: -0.04em; }
-    .subtitle { color: var(--muted); font-size: 1.04rem; max-width: 930px; line-height: 1.55; margin: 0; }
-    main { max-width: 1240px; margin: 0 auto; padding: 20px 20px 54px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr); gap: 22px; }
-    .card { background: var(--card); border: 1px solid rgba(220, 226, 238, 0.9); border-radius: 22px; box-shadow: var(--shadow); }
-    .panel { padding: 22px; }
-    .section-title { margin: 0 0 14px; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .section-title small { color: var(--muted); font-weight: 500; font-size: 0.78rem; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    label { display: block; font-weight: 650; font-size: 0.9rem; margin-bottom: 7px; }
-    .hint { display: block; color: var(--muted); font-weight: 450; font-size: 0.78rem; margin-top: 4px; line-height: 1.35; }
-    input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 13px; padding: 11px 12px; font-size: 1rem; color: var(--ink); background: #fff; outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-    textarea { min-height: 190px; resize: vertical; font-family: inherit; font-size: 0.92rem; line-height: 1.5; }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(53, 92, 255, 0.12); }
-    input[type="checkbox"] { width: auto; margin-right: 8px; transform: translateY(1px); }
-    .full { grid-column: 1 / -1; }
-    .toggle-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
-    .toggle-row button, .actions button, .mini-button { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; padding: 10px 14px; font-weight: 700; cursor: pointer; transition: transform 0.1s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
-    .toggle-row button.active, .actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .toggle-row button:hover, .actions button:hover, .mini-button:hover { transform: translateY(-1px); }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-    .actions button { border-radius: 13px; padding: 12px 15px; }
-    .actions button.secondary { background: #fff; }
-    .results { position: sticky; top: 16px; align-self: start; overflow: hidden; }
-    .hero-result { background: linear-gradient(135deg, var(--accent), #6b7cff); color: #fff; padding: 24px; }
-    .hero-result span { display: block; opacity: 0.9; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-    .hero-result strong { display: block; font-size: clamp(2rem, 5vw, 3.1rem); letter-spacing: -0.05em; }
-    .result-body { padding: 22px; }
-    .metric-list { display: grid; gap: 10px; margin: 0 0 18px; }
-    .metric { display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid var(--line); border-radius: 15px; padding: 12px 14px; background: #fff; }
-    .metric .label { color: var(--muted); font-weight: 650; font-size: 0.88rem; }
-    .metric .value { font-weight: 800; text-align: right; }
-    .metric.good .value { color: var(--good); }
-    .metric.bad .value { color: var(--bad); }
-    .metric.warn .value { color: var(--warn); }
-    .status { padding: 14px 15px; border-radius: 16px; font-weight: 750; line-height: 1.4; margin: 14px 0; }
-    .status.good { color: var(--good); background: #eaf8f0; border: 1px solid #c7eed9; }
-    .status.bad { color: var(--bad); background: #fff0ee; border: 1px solid #ffd0ca; }
-    .status.warn { color: var(--warn); background: #fff7ed; border: 1px solid #fed7aa; }
-    details { border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; background: #fbfcff; }
-    summary { cursor: pointer; font-weight: 800; }
-    .breakdown { margin-top: 10px; display: grid; gap: 8px; }
-    .breakdown-row { display: flex; justify-content: space-between; gap: 14px; color: var(--muted); font-size: 0.92rem; }
-    .breakdown-row strong { color: var(--ink); text-align: right; }
-    .note { background: var(--soft); border: 1px solid #d9defc; border-radius: 16px; padding: 13px 14px; color: #2c3a82; line-height: 1.45; font-size: 0.9rem; }
-    .divider { height: 1px; background: var(--line); margin: 20px 0; }
-    .hidden { display: none !important; }
-    .allowance-row { display: grid; grid-template-columns: 1.15fr 0.75fr 0.9fr 1fr auto; gap: 10px; align-items: end; padding: 12px; border: 1px solid var(--line); border-radius: 16px; background: #fbfcff; margin-bottom: 10px; }
-    .mini-button { border-radius: 12px; padding: 10px 12px; }
-    .danger { color: var(--bad); border-color: #ffd0ca; }
-    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: #f1f4f9; color: var(--muted); font-size: 0.8rem; font-weight: 750; }
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 940px) { main { grid-template-columns: 1fr; } .results { position: static; } }
-    @media (max-width: 720px) { .grid, .grid-3, .two-col { grid-template-columns: 1fr; } .allowance-row { grid-template-columns: 1fr; } header { padding-top: 28px; } }
-    @media print { body { background: #fff; } header, main { max-width: none; } .input-side, .actions, .mini-button, button { display: none !important; } main { display: block; } .results { position: static; box-shadow: none; } .card { box-shadow: none; } }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -5rem;
+      z-index: 100;
+      background: var(--ink);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+    }
+
+    .skip-link:focus {
+      top: 1rem;
+    }
+
+    .course-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    }
+
+    .course-nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: #202829;
+      color: #f6fbfa;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+    }
+
+    .brand {
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(246, 251, 250, 0.18);
+    }
+
+    .brand small {
+      display: block;
+      color: #bfd0ce;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand strong {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.6rem;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .nav-section {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .nav-section a {
+      text-decoration: none;
+      color: #f6fbfa;
+      padding: 0.68rem 0.75rem;
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .nav-section a:hover,
+    .nav-section a:focus-visible {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(2px);
+      outline: none;
+    }
+
+    .nav-section span {
+      color: #bfd0ce;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-panel {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(246, 251, 250, 0.18);
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: #bfd0ce;
+      font-size: 0.88rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-track {
+      height: 0.55rem;
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #44c7b8;
+      transition: width 260ms ease;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    .hero {
+      min-height: 92vh;
+      display: grid;
+      align-items: end;
+      padding: clamp(2rem, 5vw, 5rem);
+      background:
+        linear-gradient(110deg, rgba(32, 40, 41, 0.92) 0%, rgba(32, 40, 41, 0.68) 43%, rgba(32, 40, 41, 0.22) 100%),
+        url("https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=80") center / cover;
+      color: white;
+    }
+
+    .hero-inner {
+      width: min(760px, 100%);
+      animation: rise 520ms ease both;
+    }
+
+    .eyebrow {
+      color: #b7ebe4;
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 1rem;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.05;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 6rem;
+      max-width: 10ch;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero p {
+      color: #edf7f5;
+      font-size: 1.25rem;
+      max-width: 640px;
+      margin: 0 0 2rem;
+    }
+
+    .hero-actions,
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .button {
+      border: 0;
+      border-radius: var(--radius);
+      padding: 0.82rem 1rem;
+      color: white;
+      background: var(--accent);
+      text-decoration: none;
+      font-weight: 750;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .button:disabled {
+      background: var(--success);
+      cursor: default;
+      transform: none;
+    }
+
+    .button.secondary {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.34);
+    }
+
+    .button.secondary:hover,
+    .button.secondary:focus-visible {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .content-band .button.secondary,
+    .tree-actions .button.secondary {
+      color: var(--accent-dark);
+      background: white;
+      border-color: var(--accent);
+    }
+
+    .content-band .button.secondary:hover,
+    .content-band .button.secondary:focus-visible,
+    .tree-actions .button.secondary:hover,
+    .tree-actions .button.secondary:focus-visible {
+      color: white;
+      background: var(--accent-dark);
+    }
+
+    .content-band {
+      padding: clamp(2rem, 5vw, 5rem);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .content-band.light {
+      background: var(--surface);
+    }
+
+    .content-band.tint {
+      background: #e5ebea;
+    }
+
+    .section-header {
+      display: grid;
+      grid-template-columns: minmax(0, 0.72fr) minmax(280px, 0.28fr);
+      gap: clamp(1.5rem, 5vw, 4rem);
+      align-items: end;
+      margin-bottom: clamp(1.5rem, 4vw, 3rem);
+    }
+
+    h2 {
+      font-size: 3.4rem;
+    }
+
+    .section-header p,
+    .module-summary,
+    .source-list p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .overview-item {
+      background: var(--surface);
+      padding: 1.25rem;
+      min-height: 144px;
+    }
+
+    .overview-item strong {
+      display: block;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-dark);
+      margin-bottom: 0.7rem;
+    }
+
+    .overview-item p,
+    .overview-item ul {
+      margin: 0;
+      color: var(--muted);
+      padding: 0;
+      list-style: none;
+    }
+
+    .learning-room {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.28fr) minmax(0, 0.72fr);
+      gap: clamp(1rem, 4vw, 2rem);
+      align-items: start;
+    }
+
+    .lesson-tabs {
+      display: grid;
+      gap: 0.55rem;
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    .lesson-tab {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      text-align: left;
+      padding: 0.85rem;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .lesson-tab:hover,
+    .lesson-tab:focus-visible {
+      border-color: var(--accent);
+      transform: translateX(2px);
+      outline: none;
+    }
+
+    .lesson-tab.active {
+      background: #d8f3ee;
+      border-color: var(--accent);
+    }
+
+    .lesson-tab.completed::after {
+      content: "Complete";
+      display: inline-block;
+      margin-top: 0.55rem;
+      color: var(--success);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .lesson-tab strong {
+      display: block;
+      color: var(--accent-dark);
+      margin-bottom: 0.2rem;
+    }
+
+    .lesson-tab span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .lesson-panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(1.25rem, 3vw, 2rem);
+      box-shadow: var(--shadow);
+    }
+
+    .lesson-panel.active {
+      display: block;
+      animation: pop 180ms ease both;
+    }
+
+    .lesson-panel h3 {
+      font-size: 2.2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .lesson-kicker {
+      color: var(--accent-dark);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.82rem;
+      margin: 0 0 0.6rem;
+    }
+
+    .lesson-panel h4 {
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.05rem;
+      color: var(--accent-dark);
+    }
+
+    .lesson-panel p,
+    .lesson-panel li {
+      color: var(--muted);
+    }
+
+    .lesson-panel ul,
+    .lesson-panel ol {
+      padding-left: 1.25rem;
+    }
+
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .lesson-box {
+      border-left: 3px solid var(--accent);
+      background: #f7faf9;
+      padding: 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .lesson-box strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
+    }
+
+    .practice-block {
+      margin-top: 1.25rem;
+      background: #e5ebea;
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .practice-block strong {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .quiz-block {
+      margin-top: 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfb;
+      overflow: hidden;
+    }
+
+    .quiz-top {
+      padding: 1rem;
+      background: #f3f7f6;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .quiz-top strong {
+      display: block;
+      color: var(--accent-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 0.65rem;
+      padding: 1rem;
+    }
+
+    .quiz-option {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: white;
+      color: var(--ink);
+      text-align: left;
+      padding: 0.85rem;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .quiz-option:hover,
+    .quiz-option:focus-visible {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .quiz-option.correct {
+      border-color: var(--success);
+      background: #e1f4ea;
+    }
+
+    .quiz-option.incorrect {
+      border-color: var(--warn);
+      background: #fff5e6;
+    }
+
+    .quiz-feedback {
+      min-height: 3.4rem;
+      padding: 0 1rem 1rem;
+      color: var(--muted);
+    }
+
+    .quiz-feedback strong {
+      color: var(--ink);
+    }
+
+    .mini-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.7rem;
+      color: var(--accent-dark);
+      font-weight: 800;
+      font-size: 0.92rem;
+    }
+
+    .learning-map {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      border: 1px solid var(--line);
+      background: var(--line);
+      margin-top: 1rem;
+    }
+
+    .map-card {
+      background: var(--surface);
+      padding: 1.2rem;
+      min-height: 170px;
+    }
+
+    .map-card strong {
+      display: block;
+      color: var(--accent-dark);
+      margin-bottom: 0.45rem;
+    }
+
+    .map-card p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .process-flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(150px, 1fr));
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .process-step {
+      position: relative;
+      background: linear-gradient(160deg, #ffffff 0%, #eef7f5 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem;
+      min-height: 210px;
+      box-shadow: 0 10px 26px rgba(32, 40, 41, 0.08);
+      overflow: hidden;
+    }
+
+    .process-step::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0.45rem;
+      background: var(--step-color, var(--accent));
+    }
+
+    .process-step::after {
+      content: ">";
+      position: absolute;
+      right: -0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--step-color, var(--accent));
+      font-weight: 900;
+      background: var(--paper);
+      border-radius: 999px;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: grid;
+      place-items: center;
+    }
+
+    .process-step:last-child::after {
+      display: none;
+    }
+
+    .process-step span {
+      display: inline-grid;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      background: #d8f3ee;
+      color: var(--step-color, var(--accent-dark));
+      font-weight: 900;
+      margin-bottom: 0.8rem;
+    }
+
+    .process-step strong {
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .process-step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .process-step:nth-child(1) { --step-color: #0f766e; background: linear-gradient(160deg, #ffffff 0%, #d8f3ee 100%); }
+    .process-step:nth-child(2) { --step-color: #2563eb; background: linear-gradient(160deg, #ffffff 0%, #e0edff 100%); }
+    .process-step:nth-child(3) { --step-color: #7c3aed; background: linear-gradient(160deg, #ffffff 0%, #eee7ff 100%); }
+    .process-step:nth-child(4) { --step-color: #b45309; background: linear-gradient(160deg, #ffffff 0%, #fff0d8 100%); }
+    .process-step:nth-child(5) { --step-color: #be123c; background: linear-gradient(160deg, #ffffff 0%, #ffe4ea 100%); }
+    .process-step:nth-child(6) { --step-color: #15803d; background: linear-gradient(160deg, #ffffff 0%, #def7e8 100%); }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      margin: 1rem 0;
+    }
+
+    .data-table th,
+    .data-table td {
+      border: 1px solid var(--line);
+      padding: 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .data-table th {
+      background: #f3f7f6;
+      color: var(--accent-dark);
+    }
+
+    .matrix-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .matrix-table {
+      min-width: 980px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      border: 1px solid var(--line);
+      padding: 0.7rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .matrix-table th {
+      background: #f3f7f6;
+      color: var(--accent-dark);
+    }
+
+    .matrix-table input,
+    .matrix-table textarea {
+      width: 5rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.45rem;
+    }
+
+    .matrix-table textarea {
+      width: 100%;
+      min-height: 4rem;
+      resize: vertical;
+    }
+
+    .matrix-table .criterion-input {
+      width: 100%;
+      min-width: 13rem;
+    }
+
+    .matrix-table .weight-input {
+      width: 4.5rem;
+    }
+
+    .matrix-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .button.dark {
+      background: #202829;
+    }
+
+    .matrix-status {
+      color: var(--muted);
+      margin: 0.4rem 0 1rem;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.42fr) minmax(0, 0.58fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .calc-panel {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .calc-panel label {
+      display: block;
+      font-weight: 780;
+      color: var(--accent-dark);
+      margin: 0.8rem 0 0.25rem;
+    }
+
+    .calc-panel input,
+    .calc-panel select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.7rem;
+      background: white;
+    }
+
+    .calc-result {
+      border-left: 4px solid var(--accent);
+      background: #d8f3ee;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .calc-result strong {
+      display: block;
+      color: var(--accent-dark);
+      margin-bottom: 0.35rem;
+    }
+
+    .decision-tree {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .tree-player {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .tree-stage {
+      padding: clamp(1.25rem, 3vw, 2rem);
+      min-height: 300px;
+      background: linear-gradient(160deg, #ffffff 0%, #eef7f5 100%);
+    }
+
+    .tree-stage-label {
+      color: var(--accent-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 900;
+      font-size: 0.84rem;
+      margin: 0 0 0.5rem;
+    }
+
+    .tree-stage h3 {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tree-stage p {
+      color: var(--muted);
+      max-width: 820px;
+    }
+
+    .tree-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 0 2rem 2rem;
+      background: var(--surface);
+    }
+
+    .tree-result {
+      margin-top: 1rem;
+      border-left: 4px solid var(--accent);
+      background: #d8f3ee;
+      padding: 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--accent-dark);
+    }
+
+    .tree-history {
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--line);
+      background: #f3f7f6;
+      color: var(--muted);
+      min-height: 3.2rem;
+    }
+
+    .tree-history strong {
+      color: var(--accent-dark);
+    }
+
+    .decision-node {
+      display: grid;
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+      gap: 0.9rem;
+      align-items: start;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--node-color, var(--accent));
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: 0 10px 24px rgba(32, 40, 41, 0.08);
+    }
+
+    .decision-node .node-number {
+      display: grid;
+      place-items: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      background: var(--node-color, var(--accent));
+      color: white;
+      font-weight: 900;
+    }
+
+    .decision-node strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--ink);
+    }
+
+    .decision-node p {
+      margin: 0.25rem 0;
+      color: var(--muted);
+    }
+
+    .decision-node .yes {
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    .decision-node .no {
+      color: var(--warn);
+      font-weight: 800;
+    }
+
+    .copy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .copy-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(32, 40, 41, 0.08);
+    }
+
+    .copy-card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.9rem 1rem;
+      background: #f3f7f6;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .copy-card-header strong {
+      color: var(--accent-dark);
+    }
+
+    .copy-button {
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      background: white;
+      color: var(--accent-dark);
+      padding: 0.45rem 0.65rem;
+      cursor: pointer;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .copy-card pre {
+      margin: 0;
+      padding: 1rem;
+      white-space: pre-wrap;
+      color: var(--muted);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    .copy-use {
+      margin: 0;
+      padding: 0.85rem 1rem 0;
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .complete-lesson {
+      margin-top: 1.25rem;
+    }
+
+    .student-note {
+      margin-top: 1rem;
+      border-left: 4px solid var(--accent);
+      background: #d8f3ee;
+      padding: 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--accent-dark);
+    }
+
+    .module {
+      display: grid;
+      grid-template-columns: minmax(120px, 0.18fr) minmax(0, 0.82fr);
+      gap: clamp(1.25rem, 4vw, 3rem);
+      padding: clamp(1.5rem, 4vw, 3rem) 0;
+      border-top: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 480ms ease, transform 480ms ease;
+    }
+
+    .module.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .module:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .module-number {
+      color: var(--accent-dark);
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+    }
+
+    .module-body h3 {
+      font-size: 2.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .module-summary {
+      max-width: 820px;
+      margin-bottom: 1.25rem;
+    }
+
+    .learning-points {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin: 1.25rem 0;
+    }
+
+    .point {
+      border-left: 3px solid var(--accent);
+      padding: 0.2rem 0 0.2rem 0.85rem;
+      color: var(--ink);
+    }
+
+    .point small {
+      display: block;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    details {
+      border-top: 1px solid var(--line);
+      padding: 1rem 0;
+    }
+
+    details:last-child {
+      border-bottom: 1px solid var(--line);
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 780;
+      color: var(--accent-dark);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    details[open] summary::after {
+      content: "-";
+    }
+
+    details p,
+    details ul,
+    details ol {
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    .callout {
+      margin-top: 1rem;
+      border-left: 4px solid var(--warn);
+      background: #fff5e6;
+      padding: 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: #4e3821;
+    }
+
+    .takeaways {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .takeaway {
+      background: var(--surface);
+      padding: 1.25rem;
+    }
+
+    .takeaway strong {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--accent-dark);
+    }
+
+    .chat-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 0.64fr) minmax(280px, 0.36fr);
+      gap: clamp(1rem, 4vw, 2.5rem);
+      align-items: start;
+    }
+
+    .chat-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      min-height: 560px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid var(--line);
+      background: #f3f7f6;
+    }
+
+    .chat-header strong {
+      color: var(--accent-dark);
+    }
+
+    .score-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.35rem 0.7rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .messages {
+      height: 360px;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .message {
+      max-width: 82%;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      color: var(--ink);
+      animation: pop 180ms ease both;
+    }
+
+    .message.bot {
+      align-self: flex-start;
+      background: #e5ebea;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #d8f3ee;
+    }
+
+    .message.feedback {
+      align-self: flex-start;
+      border-left: 4px solid var(--accent);
+      background: #f7faf9;
+    }
+
+    .chat-input {
+      border-top: 1px solid var(--line);
+      padding: 1rem;
+      display: grid;
+      gap: 0.75rem;
+      background: #f3f7f6;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.85rem;
+      background: white;
+      color: var(--ink);
+    }
+
+    textarea:focus {
+      outline: 3px solid rgba(15, 118, 110, 0.2);
+      border-color: var(--accent);
+    }
+
+    .chat-help {
+      background: #202829;
+      color: #f6fbfa;
+      padding: 1.2rem;
+      border-radius: var(--radius);
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    .chat-help h3 {
+      font-size: 1.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .chat-help ul {
+      color: #bfd0ce;
+      padding-left: 1.1rem;
+      margin: 0;
+    }
+
+    .source-list {
+      display: grid;
+      grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
+      gap: clamp(1.5rem, 4vw, 3rem);
+    }
+
+    .source-list ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--muted);
+    }
+
+    .source-list li + li {
+      margin-top: 0.7rem;
+    }
+
+    .footer {
+      padding: 1.5rem clamp(2rem, 5vw, 5rem);
+      background: #202829;
+      color: #bfd0ce;
+      font-size: 0.92rem;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 980px) {
+      .course-shell {
+        display: block;
+      }
+
+      .course-nav {
+        position: static;
+        height: auto;
+      }
+
+      .nav-section {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .progress-panel {
+        margin-top: 0;
+      }
+
+      .section-header,
+      .chat-wrap,
+      .source-list,
+      .learning-room {
+        grid-template-columns: 1fr;
+      }
+
+      .lesson-tabs {
+        position: static;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .overview-grid,
+      .takeaways,
+      .learning-map,
+      .calculator {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 700px) {
+      .hero {
+        min-height: 82vh;
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 3.3rem;
+      }
+
+      .content-band {
+        padding: 2rem 1.25rem;
+      }
+
+      .nav-section,
+      .overview-grid,
+      .learning-points,
+      .takeaways,
+      .lesson-tabs,
+      .lesson-grid,
+      .learning-map,
+      .calculator {
+        grid-template-columns: 1fr;
+      }
+
+      .module {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .module-number,
+      .chat-help {
+        position: static;
+      }
+
+      .message {
+        max-width: 94%;
+      }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Salary, Hourly Rate and Award Comparison Calculator</h1>
-    <p class="subtitle">A manual calculator for comparing a proposed hourly rate or annual salary against a minimum award-style benchmark, including overtime, penalties, casual loading, leave loading, allowances and super assumptions.</p>
-  </header>
-
-  <main>
-    <section class="input-side card panel">
-      <h2 class="section-title">1. Pay calculation mode <small>Choose the starting point</small></h2>
-      <div class="toggle-row" aria-label="Calculation mode">
-        <button type="button" id="hourlyMode" class="active">Hourly to salary</button>
-        <button type="button" id="salaryMode">Salary to hourly</button>
+  <a class="skip-link" href="#main">Skip to course content</a>
+  <div class="course-shell">
+    <aside class="course-nav" aria-label="Course navigation">
+      <div class="brand">
+        <small>Online HR Course</small>
+        <strong>Managing Redundancy Fairly and Practically</strong>
       </div>
-      <div class="grid">
-        <div id="hourlyInputWrap">
-          <label for="actualHourly">Actual hourly rate</label>
-          <input id="actualHourly" type="number" min="0" step="0.01" value="29.70" />
-          <span class="hint">The employee's proposed or actual hourly rate.</span>
+      <nav class="nav-section">
+        <a href="#overview">Overview <span>00</span></a>
+        <a href="#redundancy-basics">Basics <span>01</span></a>
+        <a href="#process-map">Process Map <span>02</span></a>
+        <a href="#decision-tree">Decision Tree <span>03</span></a>
+        <a href="#pay-explorer">Pay <span>04</span></a>
+        <a href="#selection-template">Selection Matrix <span>05</span></a>
+        <a href="#learning-room">Modules <span>06</span></a>
+        <a href="#toolkit">Toolkit <span>07</span></a>
+        <a href="#knowledge-check">Knowledge Check <span>08</span></a>
+        <a href="#sources">Sources <span>09</span></a>
+      </nav>
+      <div class="progress-panel" aria-live="polite">
+        <div class="progress-label">
+          <span>Completion</span>
+          <strong id="progressText">0%</strong>
         </div>
-        <div id="salaryInputWrap" class="hidden">
-          <label for="actualSalary">Annual salary / package</label>
-          <input id="actualSalary" type="number" min="0" step="100" value="64152" />
-          <span class="hint">Use the annual amount to convert back to an equivalent hourly rate.</span>
-        </div>
-        <div>
-          <label for="employmentType">Employment type</label>
-          <select id="employmentType">
-            <option value="fulltime">Full-time</option>
-            <option value="parttime">Part-time</option>
-            <option value="casual">Casual</option>
-          </select>
-          <span class="hint">Part-time uses the ordinary hours entered. Casual can apply a loading to the benchmark.</span>
-        </div>
-        <div>
-          <label for="ordinaryHours">Ordinary hours per week</label>
-          <input id="ordinaryHours" type="number" min="0" step="0.1" value="38" />
-        </div>
-        <div>
-          <label for="weeksPerYear">Weeks per year</label>
-          <input id="weeksPerYear" type="number" min="0" step="0.1" value="52" />
-        </div>
-        <div>
-          <label for="awardHourly">Award / minimum base hourly rate</label>
-          <input id="awardHourly" type="number" min="0" step="0.01" value="29.70" />
-          <span class="hint">Manual Stage 1 input. Later this can be connected to award data.</span>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <h2 class="section-title">2. Super and casual loading <small>Optional assumptions</small></h2>
-      <div class="grid">
-        <div>
-          <label><input id="superIncluded" type="checkbox" /> Salary amount includes super</label>
-          <span class="hint">If ticked, the calculator extracts the estimated salary excluding super.</span>
-        </div>
-        <div>
-          <label for="superRate">Super rate %</label>
-          <input id="superRate" type="number" min="0" step="0.1" value="12" />
-        </div>
-        <div>
-          <label><input id="applyCasualLoading" type="checkbox" /> Apply casual loading to award benchmark</label>
-          <span class="hint">Usually relevant only where the employee is casual.</span>
-        </div>
-        <div>
-          <label for="casualLoadingRate">Casual loading %</label>
-          <input id="casualLoadingRate" type="number" min="0" step="0.1" value="25" />
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <h2 class="section-title">3. Annual leave loading <small>Fixed assumption</small></h2>
-      <div class="grid">
-        <div>
-          <label><input id="includeLeaveLoading" type="checkbox" checked /> Include annual leave loading</label>
-          <span class="hint">Calculated as 17.5% of 152 hours for full-time.</span>
-        </div>
-        <div>
-          <label><input id="proRataLeaveLoading" type="checkbox" checked /> Pro-rata leave loading for part-time</label>
-          <span class="hint">Uses ordinary hours / 38 for part-time. Full-time and casual stay at the fixed hours unless changed.</span>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <h2 class="section-title">4. Overtime <small>Weekly assumption</small></h2>
-      <div class="grid">
-        <div>
-          <label for="overtimeHours">Overtime hours per week</label>
-          <input id="overtimeHours" type="number" min="0" step="0.1" value="2" />
-        </div>
-        <div>
-          <label for="overtimeRule">Overtime rate</label>
-          <select id="overtimeRule">
-            <option value="none">No overtime</option>
-            <option value="timehalf" selected>All overtime at 1.5x</option>
-            <option value="double">All overtime at 2x</option>
-            <option value="first3">1.5x for first 3 hours, then 2x</option>
-            <option value="custom">Custom multiplier</option>
-          </select>
-        </div>
-        <div id="customOtWrap" class="hidden">
-          <label for="customOtMultiplier">Custom overtime multiplier</label>
-          <input id="customOtMultiplier" type="number" min="0" step="0.05" value="1.75" />
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <h2 class="section-title">5. Weekend and public holiday penalties <small>Optional</small></h2>
-      <div class="grid-3">
-        <div>
-          <label for="saturdayHours">Saturday hours per week</label>
-          <input id="saturdayHours" type="number" min="0" step="0.1" value="0" />
-        </div>
-        <div>
-          <label for="saturdayMultiplier">Saturday multiplier</label>
-          <input id="saturdayMultiplier" type="number" min="0" step="0.05" value="1.5" />
-        </div>
-        <div>
-          <label for="saturdayTreatment">Treatment</label>
-          <select id="saturdayTreatment">
-            <option value="absorbed">Salary must absorb</option>
-            <option value="paidSeparate">Paid separately</option>
-          </select>
-        </div>
-        <div>
-          <label for="sundayHours">Sunday hours per week</label>
-          <input id="sundayHours" type="number" min="0" step="0.1" value="0" />
-        </div>
-        <div>
-          <label for="sundayMultiplier">Sunday multiplier</label>
-          <input id="sundayMultiplier" type="number" min="0" step="0.05" value="2" />
-        </div>
-        <div>
-          <label for="sundayTreatment">Treatment</label>
-          <select id="sundayTreatment">
-            <option value="absorbed">Salary must absorb</option>
-            <option value="paidSeparate">Paid separately</option>
-          </select>
-        </div>
-        <div>
-          <label for="publicHolidayHours">Public holiday hours per year</label>
-          <input id="publicHolidayHours" type="number" min="0" step="0.1" value="0" />
-        </div>
-        <div>
-          <label for="publicHolidayMultiplier">Public holiday multiplier</label>
-          <input id="publicHolidayMultiplier" type="number" min="0" step="0.05" value="2.5" />
-        </div>
-        <div>
-          <label for="publicHolidayTreatment">Treatment</label>
-          <select id="publicHolidayTreatment">
-            <option value="absorbed">Salary must absorb</option>
-            <option value="paidSeparate">Paid separately</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <h2 class="section-title">6. Allowances <small>Multiple rows</small></h2>
-      <div>
-        <label><input id="includeAllowances" type="checkbox" /> Include allowances</label>
-        <span class="hint">Add hourly, weekly or annual allowances. Choose whether each allowance must be absorbed by salary or is paid separately.</span>
-      </div>
-      <div id="allowanceArea" class="hidden" style="margin-top: 12px;">
-        <div id="allowanceRows"></div>
-        <button type="button" id="addAllowance" class="mini-button">+ Add allowance</button>
-      </div>
-
-      <div class="divider"></div>
-
-      <h2 class="section-title">7. Export summary wording <small>For file note or client summary</small></h2>
-      <textarea id="summaryText" readonly></textarea>
-      <div class="actions">
-        <button type="button" id="copySummary" class="primary">Copy summary</button>
-        <button type="button" id="resetDefaults" class="secondary">Reset defaults</button>
-        <button type="button" onclick="window.print()" class="secondary">Print / save PDF</button>
-      </div>
-      <p class="note" style="margin-top: 16px;">This tool is a calculation aid only. It does not determine award coverage, classification, annualised wage clause compliance, set-off validity, NES compliance, all allowances, or legal obligations.</p>
-    </section>
-
-    <aside class="results card" aria-live="polite">
-      <div class="hero-result">
-        <span id="heroLabel">Estimated annual remuneration</span>
-        <strong id="heroValue">$0.00</strong>
-      </div>
-      <div class="result-body">
-        <div id="absorptionStatus" class="status warn">Enter details to test the result.</div>
-        <div class="metric-list">
-          <div class="metric"><span class="label">Effective hourly rate</span><span class="value" id="effectiveHourly">$0.00</span></div>
-          <div class="metric"><span class="label">Salary excluding super</span><span class="value" id="salaryExSuper">$0.00</span></div>
-          <div class="metric"><span class="label">Estimated super</span><span class="value" id="superAmount">$0.00</span></div>
-          <div class="metric"><span class="label">Award/minimum benchmark</span><span class="value" id="benchmarkAnnual">$0.00</span></div>
-          <div class="metric"><span class="label">Amount salary must absorb</span><span class="value" id="absorbBenchmark">$0.00</span></div>
-          <div class="metric" id="gapMetric"><span class="label">Surplus / shortfall</span><span class="value" id="gapAmount">$0.00</span></div>
-        </div>
-
-        <details open>
-          <summary>Calculation breakdown</summary>
-          <div class="breakdown" id="breakdown"></div>
-        </details>
-
-        <div class="divider"></div>
-        <div class="note">
-          <strong>Absorption test logic:</strong> the calculator compares the salary/remuneration available to absorb entitlements against the award/minimum benchmark items marked as absorbed by salary. Items marked as paid separately are shown in the total benchmark but not treated as requiring salary absorption.
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
         </div>
       </div>
     </aside>
-  </main>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="course-title">
+        <div class="hero-inner">
+          <p class="eyebrow">Practical redundancy training for HR teams</p>
+          <h1 id="course-title">Redundancy done with care</h1>
+          <p>Guide managers through proposed change, consultation, redeployment, documentation, and final decisions with a process that is humane, consistent, and defensible.</p>
+          <div class="hero-actions">
+            <a class="button" href="#learning-room">Start course</a>
+            <a class="button secondary" href="#knowledge-check">Go to assessment</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="overview" class="content-band light">
+        <div class="section-header">
+          <h2>Course Setup</h2>
+          <p>This self-paced course is designed for HR team members supporting Australian redundancy processes. Work through each module in order, complete the practice tasks, then finish with the chatbot knowledge check.</p>
+        </div>
+        <div class="overview-grid">
+          <div class="overview-item">
+            <strong>Audience</strong>
+            <p>HR advisers, HR business partners, people leaders, and anyone supporting redundancy conversations.</p>
+          </div>
+          <div class="overview-item">
+            <strong>Duration</strong>
+            <p>3 to 4 hours, including module quizzes, pay practice, selection matrix practice, and final assessment.</p>
+          </div>
+          <div class="overview-item">
+            <strong>Objectives</strong>
+            <p>Explain genuine redundancy, key risks, awards and agreements, pay basics, selection methods, consultation, redeployment, and documentation.</p>
+          </div>
+          <div class="overview-item">
+            <strong>Pre-reading</strong>
+            <ul>
+              <li>Redundancy Fact Sheet 2024</li>
+              <li>Steps in the process</li>
+              <li>Manager run sheet</li>
+              <li>Fair Work redundancy guidance</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout">
+          This course is not legal advice. In real matters, check awards, enterprise agreements, contracts, internal policy, leadership direction, and legal advice before giving final process or entitlement advice.
+        </div>
+        <div class="student-note">
+          <strong>How to complete this course:</strong> Start at Module 01, read each lesson, complete the practice task in your own notes, mark the module complete, then finish the chatbot knowledge check. You can return to any module at any time.
+        </div>
+      </section>
+
+      <section id="redundancy-basics" class="content-band">
+        <div class="section-header">
+          <h2>Redundancy Basics</h2>
+          <p>Before following the process, understand what redundancy is, why the process matters, and where the main risks sit.</p>
+        </div>
+        <div class="learning-map">
+          <div class="map-card">
+            <strong>What redundancy means</strong>
+            <p>Redundancy is about the job no longer needing to be done by anyone. Common reasons include restructure, lower work volumes, technology changes, relocation, closure, merger, takeover, insolvency, or bankruptcy.</p>
+          </div>
+          <div class="map-card">
+            <strong>What makes it genuine</strong>
+            <p>The job is no longer required, consultation obligations in an award or enterprise agreement have been followed, and reasonable redeployment was not available.</p>
+          </div>
+          <div class="map-card">
+            <strong>Why process matters</strong>
+            <p>If the process is not genuine, the employee may be able to challenge the dismissal. The biggest risks are pre-determining the outcome, failing to consult, ignoring redeployment, or using redundancy to mask performance issues.</p>
+          </div>
+          <div class="map-card">
+            <strong>What awards usually say</strong>
+            <p>Awards contain consultation clauses. They generally require employers to notify affected employees, provide information, invite views, and consider those views before implementing major workplace change.</p>
+          </div>
+          <div class="map-card">
+            <strong>What agreements may say</strong>
+            <p>Enterprise agreements must contain consultation terms. They may also include redundancy rules or entitlements that differ from the NES, so always check the agreement itself.</p>
+          </div>
+          <div class="map-card">
+            <strong>What HR must protect</strong>
+            <p>Fairness, consistency, documentation, employee dignity, confidentiality, decision-maker independence, and evidence that feedback was considered before the final decision.</p>
+          </div>
+        </div>
+        <div class="quiz-block" data-quiz>
+          <div class="quiz-top">
+            <strong>Concept check</strong>
+            <p>Which situation creates the biggest genuine redundancy risk?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" type="button" data-correct="false" data-feedback="This may be a genuine redundancy if consultation and redeployment are handled properly.">The business removes duplicated roles after a merger.</button>
+            <button class="quiz-option" type="button" data-correct="true" data-feedback="Correct. If someone still needs to perform the same job, it may not be a genuine redundancy.">The business removes one employee but hires another person to do the same job.</button>
+            <button class="quiz-option" type="button" data-correct="false" data-feedback="This can be redundancy, but relocation and reasonable redeployment need careful review.">The role relocates interstate and the employee may not move.</button>
+          </div>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="process-map" class="content-band light">
+        <div class="section-header">
+          <h2>Redundancy Process Map</h2>
+          <p>This is the meeting and decision flow students should understand before using the module lessons. The key idea: notify proposed change, consult, consider, then confirm.</p>
+        </div>
+        <div class="process-flow" aria-label="Redundancy process steps">
+          <div class="process-step">
+            <span>1</span>
+            <strong>Business case</strong>
+            <p>Document why the role or number of roles is proposed to change. Confirm the job is genuinely no longer required in the future structure.</p>
+          </div>
+          <div class="process-step">
+            <span>2</span>
+            <strong>Pre-checks</strong>
+            <p>Check award, agreement, contract, policy, selection needs, redeployment options, decision-maker, payroll data, and consultation obligations.</p>
+          </div>
+          <div class="process-step">
+            <span>3</span>
+            <strong>Initial meeting</strong>
+            <p>Notify the employee of proposed changes and that their position is at risk. Provide written information and confirm the consultation meeting.</p>
+          </div>
+          <div class="process-step">
+            <span>4</span>
+            <strong>Consultation</strong>
+            <p>Invite questions and feedback, discuss impacts and alternatives, review vacancies, and capture the employee's response.</p>
+          </div>
+          <div class="process-step">
+            <span>5</span>
+            <strong>Consider feedback</strong>
+            <p>The decision-maker reviews feedback, redeployment, and alternatives. Do not treat feedback as merely “noted.”</p>
+          </div>
+          <div class="process-step">
+            <span>6</span>
+            <strong>Final outcome</strong>
+            <p>Confirm the decision in writing, explain payments and notice, offer support, complete exit steps, and keep the process file.</p>
+          </div>
+        </div>
+        <div class="student-note">
+          <strong>Timing guide:</strong> internal materials suggest consultation is ideally 1-2 weeks where practical, but timing depends on the circumstances, award/agreement requirements, business urgency, and whether the employee raises feedback that needs proper consideration.
+        </div>
+      </section>
+
+      <section id="decision-tree" class="content-band">
+        <div class="section-header">
+          <h2>Redundancy Decision Tree</h2>
+          <p>Answer one question at a time. The tree shows whether to continue, pause, check entitlements, use the selection matrix, or get advice before moving to the next step.</p>
+        </div>
+        <div class="tree-player" aria-live="polite">
+          <div class="tree-stage" id="treeStage"></div>
+          <div class="tree-actions" id="treeActions"></div>
+          <div class="tree-history" id="treeHistory"><strong>Path:</strong> Start the decision tree.</div>
+        </div>
+      </section>
+
+      <section id="pay-explorer" class="content-band">
+        <div class="section-header">
+          <h2>Redundancy Pay</h2>
+          <p>Learn how the NES table works, what to check first, and when the answer may be different because of an award, agreement, small business status, or exclusion.</p>
+        </div>
+        <div class="calculator">
+          <div class="calc-panel">
+            <h3>Pay Explorer</h3>
+            <p>Use this as a learning tool only. Always confirm final figures using the Fair Work calculator, payroll data, and applicable instruments.</p>
+            <label for="serviceYears">Completed years of continuous service</label>
+            <input id="serviceYears" type="number" min="0" max="40" step="1" value="3">
+            <label for="weeklyBasePay">Weekly base pay for ordinary hours</label>
+            <input id="weeklyBasePay" type="number" min="0" step="50" value="1200">
+            <label for="eligibleStatus">Eligibility scenario</label>
+            <select id="eligibleStatus">
+              <option value="eligible">NES likely applies: 15+ employees and no exclusion selected</option>
+              <option value="under12">Less than 12 months continuous service</option>
+              <option value="small">Small business employer under NES</option>
+              <option value="casual">Casual employee</option>
+              <option value="fixed">Specific period, project, or season</option>
+              <option value="award">Award or agreement may have different rules</option>
+            </select>
+            <div class="calc-result" id="calcResult"></div>
+          </div>
+          <div>
+            <h3>NES Minimum Redundancy Pay Table</h3>
+            <table class="data-table">
+              <thead><tr><th>Continuous service</th><th>Weeks of redundancy pay</th></tr></thead>
+              <tbody>
+                <tr><td>At least 1 year but less than 2 years</td><td>4 weeks</td></tr>
+                <tr><td>At least 2 years but less than 3 years</td><td>6 weeks</td></tr>
+                <tr><td>At least 3 years but less than 4 years</td><td>7 weeks</td></tr>
+                <tr><td>At least 4 years but less than 5 years</td><td>8 weeks</td></tr>
+                <tr><td>At least 5 years but less than 6 years</td><td>10 weeks</td></tr>
+                <tr><td>At least 6 years but less than 7 years</td><td>11 weeks</td></tr>
+                <tr><td>At least 7 years but less than 8 years</td><td>13 weeks</td></tr>
+                <tr><td>At least 8 years but less than 9 years</td><td>14 weeks</td></tr>
+                <tr><td>At least 9 years but less than 10 years</td><td>16 weeks</td></tr>
+                <tr><td>At least 10 years</td><td>12 weeks</td></tr>
+              </tbody>
+            </table>
+            <div class="callout">
+              Redundancy pay is based on the employee's base pay rate for ordinary hours. It does not include bonuses, loadings, allowances, overtime, penalty rates, or other separately identifiable amounts. Notice and unused leave are separate final pay items.
+            </div>
+          </div>
+        </div>
+        <h3>Who may not get redundancy pay under the NES?</h3>
+        <div class="learning-map">
+          <div class="map-card"><strong>Less than 12 months</strong><p>Employees with less than 12 months continuous service generally do not receive NES redundancy pay.</p></div>
+          <div class="map-card"><strong>Casual employees</strong><p>Casual employees are listed by Fair Work as employees who do not get redundancy pay.</p></div>
+          <div class="map-card"><strong>Fixed period, project, or season</strong><p>Employees engaged for a specific period, task, project, or season may be excluded.</p></div>
+          <div class="map-card"><strong>Apprentices and some trainees</strong><p>Apprentices and trainees engaged only for the training arrangement may not get redundancy pay.</p></div>
+          <div class="map-card"><strong>Serious misconduct</strong><p>Employees terminated for serious misconduct do not receive redundancy pay.</p></div>
+          <div class="map-card"><strong>Small business employer</strong><p>Most small businesses with fewer than 15 employees do not pay redundancy pay under the NES, but exceptions and industry schemes can apply.</p></div>
+        </div>
+        <div class="quiz-block" data-quiz>
+          <div class="quiz-top">
+            <strong>Pay check</strong>
+            <p>An employee has 3 completed years of continuous service, works for an employer with 15+ employees, and no exclusion applies. What is the NES redundancy pay period?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" type="button" data-correct="false" data-feedback="Not quite. Two to less than three years is 6 weeks.">6 weeks</button>
+            <button class="quiz-option" type="button" data-correct="true" data-feedback="Correct. At least 3 years but less than 4 years is 7 weeks under the NES table.">7 weeks</button>
+            <button class="quiz-option" type="button" data-correct="false" data-feedback="Not quite. Four to less than five years is 8 weeks.">8 weeks</button>
+          </div>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="selection-template" class="content-band light">
+        <div class="section-header">
+          <h2>Selection Matrix Template</h2>
+          <p>When there are multiple employees in the same or very similar role, selection must be fair, relevant, objective, and documented. A skills and competency matrix helps keep the assessment focused on future role requirements rather than preference.</p>
+        </div>
+        <div class="student-note">
+          <strong>How to use this template:</strong> define the future role requirements first, choose criteria that directly connect to those requirements, set evidence sources, score consistently, and have the decision reviewed before communicating outcomes. Do not use protected attributes, unsupported assumptions, or criteria that indirectly discriminate.
+        </div>
+        <div class="matrix-actions">
+          <button class="button" type="button" id="useSuggestedCriteria">Use suggested criteria</button>
+          <button class="button dark" type="button" id="startCustomCriteria">Start with custom criteria</button>
+          <a class="button secondary" href="redundancy-selection-matrix-template.xlsx" download>Download Excel template</a>
+        </div>
+        <p class="matrix-status" id="matrixStatus">You can edit the criteria, weights, evidence sources, risk notes, and employee scores directly in the table. Weights should add to 100%.</p>
+        <div class="matrix-wrap">
+          <table class="matrix-table" aria-label="Skills and competency matrix template">
+            <thead>
+              <tr>
+                <th>Criterion</th>
+                <th>Weight</th>
+                <th>Evidence source</th>
+                <th>Employee A score</th>
+                <th>Employee B score</th>
+                <th>Employee C score</th>
+                <th>Notes and risk check</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input class="criterion-input" type="text" value="Essential technical skills for future role"></td>
+                <td><input class="weight-input" type="number" min="0" max="100" value="25">%</td>
+                <td><textarea>Qualifications, system records, work samples, role requirements</textarea></td>
+                <td><input type="number" min="0" max="5" value="4"></td>
+                <td><input type="number" min="0" max="5" value="3"></td>
+                <td><input type="number" min="0" max="5" value="5"></td>
+                <td><textarea>Use evidence, not manager impression. Score 0-5.</textarea></td>
+              </tr>
+              <tr>
+                <td><input class="criterion-input" type="text" value="Capability against future operating model"></td>
+                <td><input class="weight-input" type="number" min="0" max="100" value="25">%</td>
+                <td><textarea>Documented examples, project work, systems capability, role mapping</textarea></td>
+                <td><input type="number" min="0" max="5" value="3"></td>
+                <td><input type="number" min="0" max="5" value="4"></td>
+                <td><input type="number" min="0" max="5" value="4"></td>
+                <td><textarea>Explain how the future role differs from the current role.</textarea></td>
+              </tr>
+              <tr>
+                <td><input class="criterion-input" type="text" value="Relevant experience and knowledge"></td>
+                <td><input class="weight-input" type="number" min="0" max="100" value="20">%</td>
+                <td><textarea>Role history, documented projects, cross-functional knowledge</textarea></td>
+                <td><input type="number" min="0" max="5" value="5"></td>
+                <td><input type="number" min="0" max="5" value="3"></td>
+                <td><input type="number" min="0" max="5" value="3"></td>
+                <td><textarea>Avoid “last in, first out” as a shortcut.</textarea></td>
+              </tr>
+              <tr>
+                <td><input class="criterion-input" type="text" value="Objectively evidenced performance"></td>
+                <td><input class="weight-input" type="number" min="0" max="100" value="20">%</td>
+                <td><textarea>Recent documented reviews, objective KPIs, quality data</textarea></td>
+                <td><input type="number" min="0" max="5" value="3"></td>
+                <td><input type="number" min="0" max="5" value="4"></td>
+                <td><input type="number" min="0" max="5" value="3"></td>
+                <td><textarea>Do not use vague behaviour concerns. Check consistency.</textarea></td>
+              </tr>
+              <tr>
+                <td><input class="criterion-input" type="text" value="Required licences, qualifications, or compliance capability"></td>
+                <td><input class="weight-input" type="number" min="0" max="100" value="10">%</td>
+                <td><textarea>Licence register, training records, compliance requirements</textarea></td>
+                <td><input type="number" min="0" max="5" value="5"></td>
+                <td><input type="number" min="0" max="5" value="5"></td>
+                <td><input type="number" min="0" max="5" value="4"></td>
+                <td><textarea>Only include if genuinely required for the future role.</textarea></td>
+              </tr>
+              <tr>
+                <th colspan="3">Weighted total</th>
+                <td id="matrixA">0</td>
+                <td id="matrixB">0</td>
+                <td id="matrixC">0</td>
+                <td id="matrixWeightStatus">Higher score may indicate stronger fit, but review all evidence and risk flags before deciding.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="quiz-block" data-quiz>
+          <div class="quiz-top">
+            <strong>Selection check</strong>
+            <p>What should happen before the selection matrix is used to decide who is affected?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. Reusing old criteria may not match the future role or current legal risk.">Use the same criteria as last time to stay consistent.</button>
+            <button class="quiz-option" type="button" data-correct="true" data-feedback="Correct. Criteria must connect to the future role and be supported by objective evidence.">Define future role requirements, choose objective criteria, identify evidence sources, and check discrimination risk.</button>
+            <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. Preference without evidence is subjective and hard to defend.">Ask the manager which employee they most want to keep.</button>
+          </div>
+          <div class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="learning-room" class="content-band tint">
+        <div class="section-header">
+          <h2>Course Modules</h2>
+          <p>Select each module to work through the lesson. Read the guidance, complete the practice task, then mark the module complete before moving on.</p>
+        </div>
+        <div class="student-note">
+          Each module includes a quick check question. Choose the best answer to get instant feedback before moving to the next module.
+        </div>
+        <br>
+        <div class="learning-room">
+          <div class="lesson-tabs" role="tablist" aria-label="Detailed course modules">
+            <button class="lesson-tab active" type="button" role="tab" aria-selected="true" data-lesson="lesson-1">
+              <strong>01 Foundations</strong>
+              <span>What redundancy is and is not</span>
+            </button>
+            <button class="lesson-tab" type="button" role="tab" aria-selected="false" data-lesson="lesson-2">
+              <strong>02 Planning</strong>
+              <span>Prepare before speaking to employees</span>
+            </button>
+            <button class="lesson-tab" type="button" role="tab" aria-selected="false" data-lesson="lesson-3">
+              <strong>03 Notification</strong>
+              <span>Run the first proposed change meeting</span>
+            </button>
+            <button class="lesson-tab" type="button" role="tab" aria-selected="false" data-lesson="lesson-4">
+              <strong>04 Consultation</strong>
+              <span>Invite feedback and assess redeployment</span>
+            </button>
+            <button class="lesson-tab" type="button" role="tab" aria-selected="false" data-lesson="lesson-5">
+              <strong>05 Selection</strong>
+              <span>Use fair and defensible criteria</span>
+            </button>
+            <button class="lesson-tab" type="button" role="tab" aria-selected="false" data-lesson="lesson-6">
+              <strong>06 Close-Out</strong>
+              <span>Confirm outcomes and finish well</span>
+            </button>
+          </div>
+
+          <div>
+            <article id="lesson-1" class="lesson-panel active" role="tabpanel">
+              <p class="lesson-kicker">Module 01 lesson</p>
+              <h3>Redundancy Foundations</h3>
+              <p>This module gives you the threshold test for redundancy: the focus is the position, not the person. A redundancy process starts with an operational change that means the employer no longer requires the employee's job to be performed by anyone, or where insolvency or bankruptcy creates that outcome.</p>
+              <div class="lesson-grid">
+                <div class="lesson-box">
+                  <strong>Confirmed guidance</strong>
+                  Fair Work describes genuine redundancy as requiring that the job no longer needs to be done by anyone and that consultation obligations in the relevant award or enterprise agreement have been followed.
+                </div>
+                <div class="lesson-box">
+                  <strong>Internal training point</strong>
+                  The Inject HR materials reinforce that redundancy should not be used as a substitute for managing performance, behaviour, or interpersonal conflict.
+                </div>
+              </div>
+              <h4>Teach the distinction</h4>
+              <ul>
+                <li><strong>Role-based:</strong> “The business is proposing to remove or change this position because of operational requirements.”</li>
+                <li><strong>Person-based risk:</strong> “This person is not performing, so we will call it redundancy.”</li>
+                <li><strong>Process-based risk:</strong> “The role may be redundant, but we have not checked consultation or redeployment obligations.”</li>
+              </ul>
+              <h4>Plain-English explanation</h4>
+              <p>“The safest way to think about redundancy is to remove the employee's name from the first question. Ask whether the job, as a job, is still required in the future structure. If the answer depends on the employee's conduct, attitude, or manager preference, pause and get advice.”</p>
+              <div class="practice-block">
+                <strong>Practice task: redundancy or not?</strong>
+                Classify four scenarios: a duplicated role after a merger, a manager wanting to remove a difficult employee, reduced hours after a downturn, and relocation of a role interstate. For each, write down the business reason, the process risk, and what advice you would seek before action.
+              </div>
+              <div class="quiz-block" data-quiz>
+                <div class="quiz-top">
+                  <strong>Quick check</strong>
+                  <p>A manager says, “This person is difficult and the team would run better without them. Can we make their role redundant?” What is the safest first response?</p>
+                </div>
+                <div class="quiz-options">
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. That treats redundancy as a person-based solution and may mask a performance or conduct issue.">Yes, if the manager can explain the business benefit.</button>
+                  <button class="quiz-option" type="button" data-correct="true" data-feedback="Strong. Start by separating role-based operational change from performance, conduct, or manager preference.">Pause and ask whether the job itself is no longer required by anyone.</button>
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Incomplete. Consultation matters, but first you need to test whether this is genuinely role-based.">Book a consultation meeting and let the employee respond.</button>
+                </div>
+                <div class="quiz-feedback" aria-live="polite"></div>
+              </div>
+              <h4>Apply this on the job</h4>
+              <p>Use “the role is proposed to be made redundant” rather than “we are making the person redundant.” That language helps you keep the process role-based and avoids implying a final decision too early.</p>
+            </article>
+
+            <article id="lesson-2" class="lesson-panel" role="tabpanel">
+              <p class="lesson-kicker">Module 02 lesson</p>
+              <h3>Planning Before Notification</h3>
+              <p>This module turns the concept into a prepared process. HR should not let a manager hold the first meeting until the business reason, proposed structure, documents, consultation path, and employee support plan are ready.</p>
+              <div class="lesson-grid">
+                <div class="lesson-box">
+                  <strong>Documents to prepare</strong>
+                  Proposed changes letter, meeting script, consultation invitation, note-taking template, open roles list, redundancy estimate, and draft notice of redundancy.
+                </div>
+                <div class="lesson-box">
+                  <strong>Checks to complete</strong>
+                  Award or enterprise agreement, employment contract, company policy, payroll data, continuous service, small business status, and any associated entities.
+                </div>
+              </div>
+              <h4>Planning sequence</h4>
+              <ol>
+                <li>Confirm the operational reason and proposed future structure.</li>
+                <li>Identify affected roles and whether selection criteria are required.</li>
+                <li>Check consultation obligations in awards, agreements, contracts, and policy.</li>
+                <li>Identify who the decision-maker is and how employee feedback will reach them.</li>
+                <li>Prepare a current list of vacancies and possible redeployment options.</li>
+                <li>Coordinate meeting logistics, confidentiality, note-taking, payroll estimates, and wellbeing support.</li>
+              </ol>
+              <h4>What to look for in an award or agreement</h4>
+              <p>Do not just ask whether an employee is award-covered. Read the consultation and redundancy clauses. Awards generally include standard consultation obligations for major workplace change. Enterprise agreements must contain consultation terms and may include redundancy rules that differ from the NES. Some industry awards also have specific redundancy schemes that change when redundancy applies, who is covered, or what must be paid.</p>
+              <ul>
+                <li>Does the instrument require written information about the change?</li>
+                <li>Does it require consultation with representatives or unions?</li>
+                <li>Does it contain redundancy pay rules different from the NES?</li>
+                <li>Does it include dispute resolution steps that could be triggered?</li>
+              </ul>
+              <h4>Manager coaching language</h4>
+              <p>“Your role in the first meeting is to explain the proposed business change clearly and compassionately. It is not to argue the outcome, defend every detail, or tell the employee the decision is final.”</p>
+              <div class="practice-block">
+                <strong>Practice task: readiness gate</strong>
+                Imagine a manager wants to hold the first meeting today but only has a verbal business reason and no vacancy list. Decide whether you would let the meeting proceed. Write the missing items you would require first.
+              </div>
+              <div class="quiz-block" data-quiz>
+                <div class="quiz-top">
+                  <strong>Quick check</strong>
+                  <p>Which item is most important to prepare before the first proposed redundancy meeting?</p>
+                </div>
+                <div class="quiz-options">
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Not enough. A payment estimate is useful, but the process also needs the proposed change rationale and consultation plan.">Only the redundancy payment estimate.</button>
+                  <button class="quiz-option" type="button" data-correct="true" data-feedback="Strong. The first meeting needs a documented proposed change, consultation path, decision-maker involvement, and redeployment preparation.">Business rationale, proposed change letter, consultation plan, and redeployment review.</button>
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. Systems access may be relevant in some situations, but it should not replace process preparation.">A plan to pause systems access immediately.</button>
+                </div>
+                <div class="quiz-feedback" aria-live="polite"></div>
+              </div>
+              <h4>Apply this on the job</h4>
+              <p>Speed is not the same as readiness. If the business reason is sound but the process materials are not ready, pause long enough to prepare the employee conversation properly.</p>
+            </article>
+
+            <article id="lesson-3" class="lesson-panel" role="tabpanel">
+              <p class="lesson-kicker">Module 03 lesson</p>
+              <h3>Initial Notification Meeting</h3>
+              <p>The first meeting is the moment that sets the tone. The employee should understand the proposed change, why their position is at risk, what happens next, how they can provide feedback, and what support is available.</p>
+              <div class="lesson-grid">
+                <div class="lesson-box">
+                  <strong>What to say</strong>
+                  “These changes place your position at risk of redundancy. No final decision has been made. We want to give you time to consider the information and provide feedback.”
+                </div>
+                <div class="lesson-box">
+                  <strong>What not to say</strong>
+                  “Your role is redundant,” “There is nothing you can do,” “This is because performance has not been strong,” or “We have already decided.”
+                </div>
+              </div>
+              <h4>Meeting flow</h4>
+              <ol>
+                <li>Open calmly and explain who is present.</li>
+                <li>Read or summarise the proposed changes letter.</li>
+                <li>Explain the business context and why the role is at risk.</li>
+                <li>Confirm the decision is not final and invite feedback.</li>
+                <li>Explain the consultation meeting date, support person option, and how to submit questions.</li>
+                <li>Discuss immediate arrangements such as work attendance, systems, confidentiality, EAP, and safe travel.</li>
+              </ol>
+              <h4>Handling employee reactions</h4>
+              <ul>
+                <li><strong>Shock:</strong> Pause, repeat the next step, and do not overload them with detail.</li>
+                <li><strong>Anger:</strong> Acknowledge the impact and bring the conversation back to process.</li>
+                <li><strong>Questions:</strong> Clarify what you can, then capture detailed questions for consultation.</li>
+                <li><strong>No response:</strong> Give them time and confirm the next meeting in writing.</li>
+              </ul>
+              <div class="practice-block">
+                <strong>Practice task: first five minutes</strong>
+                Draft the first five sentences you would ask the manager to say in the meeting. Your draft must include proposed-change language, the role at risk, no final decision, the next consultation meeting, and the support person option.
+              </div>
+              <div class="quiz-block" data-quiz>
+                <div class="quiz-top">
+                  <strong>Quick check</strong>
+                  <p>Which sentence is best for the first meeting?</p>
+                </div>
+                <div class="quiz-options">
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. It presents the decision as final and skips consultation.">“Your role has been made redundant and today we will explain the package.”</button>
+                  <button class="quiz-option" type="button" data-correct="true" data-feedback="Strong. It uses proposed language, identifies the role at risk, and leaves room for consultation.">“The proposed changes place your position at risk of redundancy, and no final decision has been made.”</button>
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. Performance should not be mixed into the redundancy notification.">“This is partly because your recent performance has not been where we need it.”</button>
+                </div>
+                <div class="quiz-feedback" aria-live="polite"></div>
+              </div>
+              <h4>Apply this on the job</h4>
+              <p>Keep the tone steady and the message short. Over-talking is common when managers feel uncomfortable; a clear pause is often more respectful than filling the room.</p>
+            </article>
+
+            <article id="lesson-4" class="lesson-panel" role="tabpanel">
+              <p class="lesson-kicker">Module 04 lesson</p>
+              <h3>Consultation and Redeployment</h3>
+              <p>Consultation is more than telling. It is the stage where the employee can ask questions, challenge assumptions, suggest alternatives, and discuss whether redeployment is possible. The decision-maker must genuinely consider what is raised.</p>
+              <div class="lesson-grid">
+                <div class="lesson-box">
+                  <strong>Consultation should cover</strong>
+                  The proposed change, expected impact, employee questions, alternatives, ways to reduce adverse effects, and current or potential redeployment options.
+                </div>
+                <div class="lesson-box">
+                  <strong>Redeployment should consider</strong>
+                  Current vacancies, suitable alternative roles, associated entities where relevant, location, skills, pay, training, and the employee's own preferences.
+                </div>
+              </div>
+              <h4>Consultation meeting prompts</h4>
+              <ul>
+                <li>“What questions do you have about the proposed change?”</li>
+                <li>“Is there anything you think we should consider before a final decision is made?”</li>
+                <li>“Are there alternative arrangements you would like us to assess?”</li>
+                <li>“Would you like to discuss any current vacancies or possible redeployment options?”</li>
+                <li>“Is there anything about the expected impact on you that we should understand?”</li>
+              </ul>
+              <h4>Decision-maker review</h4>
+              <p>After consultation, HR should ensure the decision-maker receives the employee's feedback, any notes, and a clear recommendation or risk summary. If the employee has raised a practical alternative, it should be assessed and documented before the outcome is confirmed.</p>
+              <div class="practice-block">
+                <strong>Practice task: feedback triage</strong>
+                Sort employee feedback into four categories: clarify now, investigate before deciding, escalate for advice, or record as considered but not accepted. Then draft a short note to the decision-maker.
+              </div>
+              <div class="quiz-block" data-quiz>
+                <div class="quiz-top">
+                  <strong>Quick check</strong>
+                  <p>The employee suggests reducing hours instead of removing the role. What should HR do next?</p>
+                </div>
+                <div class="quiz-options">
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. Consultation is not meaningful if alternatives are dismissed without review.">Explain that the business has already decided and move to final notice.</button>
+                  <button class="quiz-option" type="button" data-correct="true" data-feedback="Strong. Capture the suggestion, assess it with the decision-maker, document the reasoning, then respond.">Document the suggestion and have the decision-maker genuinely consider whether it changes the proposed outcome.</button>
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Incomplete. The employee does not need to agree, but their alternative still needs proper consideration.">Ask the employee to agree in writing that consultation is complete.</button>
+                </div>
+                <div class="quiz-feedback" aria-live="polite"></div>
+              </div>
+              <h4>Apply this on the job</h4>
+              <p>Do not just write “feedback noted.” Record what was raised, who considered it, and why it did or did not change the proposed outcome.</p>
+            </article>
+
+            <article id="lesson-5" class="lesson-panel" role="tabpanel">
+              <p class="lesson-kicker">Module 05 lesson</p>
+              <h3>Fair Selection and Risk Controls</h3>
+              <p>Selection becomes important where the business needs fewer roles than the number of people currently performing similar work. HR's task is to keep the process relevant, objective, transparent, and free from discriminatory factors.</p>
+              <div class="lesson-grid">
+                <div class="lesson-box">
+                  <strong>Lower-risk criteria</strong>
+                  Required skills, qualifications, role knowledge, objectively evidenced performance, capability against the future structure, and relevant experience.
+                </div>
+                <div class="lesson-box">
+                  <strong>Higher-risk criteria</strong>
+                  Attendance without context, age-linked tenure rules, subjective manager preference, untested assumptions, or criteria that map onto protected attributes.
+                </div>
+              </div>
+              <h4>Selection design steps</h4>
+              <ol>
+                <li>Define the future role or smaller team requirement.</li>
+                <li>Select criteria that directly relate to that requirement.</li>
+                <li>Decide what evidence will be used for each criterion.</li>
+                <li>Check for discrimination or adverse impact risks.</li>
+                <li>Use more than one assessor where appropriate.</li>
+                <li>Keep scoring notes factual, respectful, and reviewable.</li>
+              </ol>
+              <h4>Worked example</h4>
+              <p>Instead of “least committed,” use “availability and capability to perform the required future operating model,” then define the evidence. Instead of “most sick leave,” consider whether attendance is truly inherent to the future role and seek advice before using it.</p>
+              <h4>Using the matrix fairly</h4>
+              <p>A matrix is not a magic answer. It is a way to make reasoning visible. Use it only after the future role requirements are clear. Scores should be supported by evidence, reviewed for consistency, and checked for discrimination risk. If two employees are close in score, look carefully at the evidence quality before treating the numbers as decisive.</p>
+              <div class="practice-block">
+                <strong>Practice task: criteria repair</strong>
+                Rewrite these flawed criteria: “least committed,” “most sick leave,” “most recent hire,” and “manager preference.” Replace each with a role-relevant criterion or flag it as too risky to use.
+              </div>
+              <div class="quiz-block" data-quiz>
+                <div class="quiz-top">
+                  <strong>Quick check</strong>
+                  <p>Which selection criterion is usually the most defensible?</p>
+                </div>
+                <div class="quiz-options">
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. Attendance can create discrimination issues if used without context or advice.">Most days present in the office this year.</button>
+                  <button class="quiz-option" type="button" data-correct="true" data-feedback="Strong. It is tied to future role requirements and can be supported with evidence.">Documented capability against the skills required in the future operating model.</button>
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. Recent hire can create age or other fairness risks and may not relate to future requirements.">Last in, first out.</button>
+                </div>
+                <div class="quiz-feedback" aria-live="polite"></div>
+              </div>
+              <h4>Apply this on the job</h4>
+              <p>Write selection notes as though they may later be read by the employee, a regulator, or a tribunal. That discipline usually improves fairness and clarity fast.</p>
+            </article>
+
+            <article id="lesson-6" class="lesson-panel" role="tabpanel">
+              <p class="lesson-kicker">Module 06 lesson</p>
+              <h3>Final Decision, Entitlements, and Close-Out</h3>
+              <p>The final stage should confirm the outcome clearly, but only after consultation and redeployment have been properly considered. HR then supports notice, final pay, systems access, equipment, team communications, wellbeing, and records.</p>
+              <div class="lesson-grid">
+                <div class="lesson-box">
+                  <strong>Before confirming</strong>
+                  Check that consultation occurred, feedback was considered, redeployment was reviewed, decision-maker notes are complete, and entitlements have been checked.
+                </div>
+                <div class="lesson-box">
+                  <strong>After confirming</strong>
+                  Provide written notice, final pay details, support options, return of property steps, reference position if approved, and clear contact points.
+                </div>
+              </div>
+              <h4>Final meeting flow</h4>
+              <ol>
+                <li>Thank the employee for engaging in consultation.</li>
+                <li>Summarise what was considered, including feedback or alternatives.</li>
+                <li>Confirm whether the redundancy is proceeding.</li>
+                <li>Provide the written notice and explain key dates.</li>
+                <li>Explain estimated payments, notice, leave, and any outplacement support.</li>
+                <li>Confirm practical next steps and support after the meeting.</li>
+              </ol>
+              <h4>Entitlement checks</h4>
+              <p>Fair Work guidance says redundancy pay may depend on continuous service, whether the employer has at least 15 employees, and whether an award or enterprise agreement changes the entitlement. Some employees, including casuals and employees with less than 12 months' service, may not receive redundancy pay under the NES. Always check the current facts and instruments before confirming figures.</p>
+              <p>When estimating redundancy pay, start with eligibility, then service, then base pay for ordinary hours. Redundancy pay is separate from notice, payment in lieu of notice, unused annual leave, long service leave, and any other final pay items.</p>
+              <div class="practice-block">
+                <strong>Practice task: close-out file review</strong>
+                Before confirming an outcome, check whether the file contains the proposed change letter, consultation notes, employee feedback, decision-maker review, redeployment evidence, payment estimate, written notice, and final communication plan.
+              </div>
+              <div class="quiz-block" data-quiz>
+                <div class="quiz-top">
+                  <strong>Quick check</strong>
+                  <p>When is it appropriate to confirm the final redundancy outcome?</p>
+                </div>
+                <div class="quiz-options">
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Risky. The first meeting is notification of proposed change, not final confirmation.">At the first meeting, once the employee receives the letter.</button>
+                  <button class="quiz-option" type="button" data-correct="true" data-feedback="Strong. Final confirmation should follow genuine consultation, redeployment review, decision-maker consideration, and written notice.">After consultation feedback and redeployment options have been considered by the decision-maker.</button>
+                  <button class="quiz-option" type="button" data-correct="false" data-feedback="Incomplete. Agreement is not required, but process steps and written confirmation still matter.">Only once the employee agrees with the business decision.</button>
+                </div>
+                <div class="quiz-feedback" aria-live="polite"></div>
+              </div>
+              <h4>Apply this on the job</h4>
+              <p>The employee does not need to agree with the outcome for the process to conclude. The organisation does need to show the process was genuine, considered, and properly documented.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="toolkit" class="content-band light">
+        <div class="section-header">
+          <h2>Practice Toolkit</h2>
+          <p>Use these tools as you work through the course. They are training aids, not approved company templates, and should be checked against policy before live use.</p>
+        </div>
+        <h3>Email and Meeting templates for clients</h3>
+        <p class="module-summary">Use these as starting points when helping a client or manager prepare written communications. Each template includes a short note on when to use it.</p>
+        <div class="copy-grid">
+          <div class="copy-card">
+            <div class="copy-card-header">
+              <strong>Initial Meeting Opening</strong>
+              <button class="copy-button" type="button">Copy</button>
+            </div>
+            <p class="copy-use">Use this at the start of the first meeting to explain that the role is at risk and the change is still proposed.</p>
+            <pre>We are meeting today to talk with you about proposed changes to the business. Unfortunately, these proposed changes mean your position of [job title] is at risk of redundancy. No final decision has been made. We want to provide you with the information today, give you time to consider it, and then meet again so you can ask questions and provide feedback before any final decision is made.</pre>
+          </div>
+          <div class="copy-card">
+            <div class="copy-card-header">
+              <strong>Consultation Meeting Invitation</strong>
+              <button class="copy-button" type="button">Copy</button>
+            </div>
+            <p class="copy-use">Use this after the initial meeting to confirm the consultation meeting and support person option.</p>
+            <pre>Following our meeting today, we would like to invite you to a consultation meeting on [date] at [time]. The purpose of the meeting is to discuss the proposed changes, answer any questions you may have, consider any feedback or alternatives you would like to raise, and discuss any current roles that may be suitable for redeployment. You may bring a support person if you wish.</pre>
+          </div>
+          <div class="copy-card">
+            <div class="copy-card-header">
+              <strong>Redeployment Discussion</strong>
+              <button class="copy-button" type="button">Copy</button>
+            </div>
+            <p class="copy-use">Use this in consultation when discussing current vacancies or possible alternative roles.</p>
+            <pre>As part of the consultation process, we also need to consider whether there are any suitable redeployment options. We have reviewed current vacancies and would like to discuss these with you. Please let us know if there are any roles you would like us to consider, including roles that may require training, different duties, different hours, or a different location.</pre>
+          </div>
+          <div class="copy-card">
+            <div class="copy-card-header">
+              <strong>Decision-Maker Feedback Note</strong>
+              <button class="copy-button" type="button">Copy</button>
+            </div>
+            <p class="copy-use">Use this internally to summarise employee feedback for the person making the final decision.</p>
+            <pre>Employee feedback received: [summarise feedback]. Questions raised: [summarise questions]. Alternatives suggested: [summarise alternatives]. Redeployment matters raised: [summarise]. Recommended consideration required: [what the decision-maker must consider]. Proposed response: [accept / investigate / not accepted, with reasons]. Decision-maker review completed by: [name/date].</pre>
+          </div>
+          <div class="copy-card">
+            <div class="copy-card-header">
+              <strong>Final Outcome Meeting Opening</strong>
+              <button class="copy-button" type="button">Copy</button>
+            </div>
+            <p class="copy-use">Use this when consultation is complete and the final decision is being communicated.</p>
+            <pre>Thank you for meeting with us and for providing your feedback during consultation. We have considered the feedback and questions you raised, including [briefly identify key matters]. After considering those matters and the available redeployment options, the business has decided that the redundancy will proceed. We will now talk through the written notice, key dates, payments, and support available to you.</pre>
+          </div>
+          <div class="copy-card">
+            <div class="copy-card-header">
+              <strong>When Feedback Changes the Outcome</strong>
+              <button class="copy-button" type="button">Copy</button>
+            </div>
+            <p class="copy-use">Use this when consultation feedback means the business needs to pause or review the proposed change.</p>
+            <pre>Thank you for the feedback and alternatives you provided during consultation. After considering the matters you raised, the business has decided to review the proposed change before making any final decision. We will come back to you by [date] with an update on next steps. No final redundancy decision has been made at this stage.</pre>
+          </div>
+        </div>
+        <br>
+        <details open>
+          <summary>Pre-notification checklist</summary>
+          <ul>
+            <li>Business reason for proposed change is documented.</li>
+            <li>Future structure or operating model is clear enough to explain.</li>
+            <li>Affected role or roles are identified.</li>
+            <li>Applicable award, enterprise agreement, contract, and internal policy have been checked.</li>
+            <li>Decision-maker is identified and available to consider feedback.</li>
+            <li>Proposed changes letter and meeting script are prepared.</li>
+            <li>Current vacancies and possible redeployment options have been reviewed.</li>
+            <li>Redundancy pay estimate and notice assumptions have been checked by payroll or the responsible team.</li>
+            <li>Meeting time, privacy, note taker, employee support, and safe travel home have been planned.</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Initial meeting wording guide</summary>
+          <p>Use calm, direct, proposed-change language. For example:</p>
+          <p>“We are meeting today to talk with you about proposed changes to the business. Unfortunately, these proposed changes mean your position of [job title] is at risk of redundancy. No final decision has been made. We want to give you the letter today, allow you time to read it, and then meet again so you can ask questions and provide feedback before a final decision is made.”</p>
+          <p>Close the meeting by confirming the consultation meeting time, the support person option, how to submit questions, and any immediate practical arrangements.</p>
+        </details>
+        <details>
+          <summary>Consultation question bank</summary>
+          <ul>
+            <li>What questions do you have about the proposed change?</li>
+            <li>Is there anything you believe we should consider before a final decision is made?</li>
+            <li>Are there alternatives to redundancy you would like us to assess?</li>
+            <li>Are there current vacancies you would like to discuss as potential redeployment options?</li>
+            <li>Is there anything about the impact on you that we should understand?</li>
+            <li>Would you like time to provide further written feedback after this meeting?</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Selection criteria risk check</summary>
+          <p>Before using selection criteria, ask:</p>
+          <ul>
+            <li>Is this criterion directly relevant to the future role or operating model?</li>
+            <li>Can we evidence it objectively?</li>
+            <li>Would it unfairly disadvantage someone because of a protected attribute or protected absence?</li>
+            <li>Would the employee understand why this criterion was used?</li>
+            <li>Would the notes still read as fair and respectful if reviewed externally?</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Final decision file check</summary>
+          <ul>
+            <li>Proposed change letter was issued.</li>
+            <li>Consultation meeting notes are complete.</li>
+            <li>Employee feedback and questions were captured.</li>
+            <li>Decision-maker considered the feedback before the outcome was confirmed.</li>
+            <li>Redeployment options were reviewed and documented.</li>
+            <li>Entitlements, notice, and final pay were checked.</li>
+            <li>Written notice of redundancy was provided if the decision proceeded.</li>
+            <li>Exit steps, equipment, systems access, EAP, outplacement, and internal communications were completed.</li>
+          </ul>
+        </details>
+      </section>
+
+      <section id="takeaways" class="content-band tint">
+        <div class="section-header">
+          <h2>Key Takeaways</h2>
+          <p>These are the messages you should be able to apply without notes after the course.</p>
+        </div>
+        <div class="takeaways">
+          <div class="takeaway"><strong>Role, not person</strong> Redundancy should be anchored to operational change and the future need for the job.</div>
+          <div class="takeaway"><strong>Proposed means proposed</strong> The employee must have a real chance to provide feedback before final confirmation.</div>
+          <div class="takeaway"><strong>Redeployment matters</strong> Open roles and associated entities should be considered where relevant.</div>
+          <div class="takeaway"><strong>Selection must be fair</strong> Criteria should be objective, transparent, relevant, and non-discriminatory.</div>
+          <div class="takeaway"><strong>Records protect the process</strong> Document business reasons, feedback, decision-maker review, and final outcomes.</div>
+          <div class="takeaway"><strong>Check entitlements carefully</strong> Pay and notice depend on facts, instruments, and policy.</div>
+        </div>
+      </section>
+
+      <section id="knowledge-check" class="content-band light">
+        <div class="section-header">
+          <h2>Chatbot Knowledge Check</h2>
+          <p>Answer each scenario in your own words. The chatbot checks for judgement, process discipline, and practical HR advice rather than perfect phrasing.</p>
+        </div>
+        <div class="chat-wrap">
+          <div class="chat-panel" aria-label="Interactive knowledge check">
+            <div class="chat-header">
+              <strong>Redundancy Coach</strong>
+              <span class="score-pill" id="scoreText">Question 1 of 5</span>
+            </div>
+            <div class="messages" id="messages" aria-live="polite"></div>
+            <form class="chat-input" id="chatForm">
+              <label for="answerInput">Your response</label>
+              <textarea id="answerInput" required placeholder="Type how you would advise the manager..."></textarea>
+              <div class="inline-actions">
+                <button class="button" type="submit">Submit answer</button>
+                <button class="button secondary" type="button" id="hintButton">Show hint</button>
+                <button class="button secondary" type="button" id="resetButton">Restart</button>
+              </div>
+            </form>
+          </div>
+          <aside class="chat-help">
+            <h3>What strong answers include</h3>
+            <ul>
+              <li>Role-based business reason</li>
+              <li>Proposed change language</li>
+              <li>Meaningful consultation</li>
+              <li>Redeployment review</li>
+              <li>Objective selection criteria</li>
+              <li>Written documentation</li>
+              <li>Escalation for policy or legal risk</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <section id="sources" class="content-band">
+        <div class="source-list">
+          <div>
+            <h2>Sources</h2>
+            <p>Internal company materials take priority where they apply. External sources are general guidance and should be checked for currency before production use.</p>
+          </div>
+          <ul>
+            <li>Internal Redundancy Fact Sheet 2024.</li>
+            <li>Internal Steps in the process - staff redundancy.</li>
+            <li>Internal manager run sheet for conducting initial meeting for proposed redundancy.</li>
+            <li><a href="https://www.fairwork.gov.au/ending-employment/redundancy" target="_blank" rel="noreferrer">Fair Work Ombudsman: Redundancy</a>.</li>
+            <li><a href="https://www.fairwork.gov.au/ending-employment/redundancy/redundancy-pay" target="_blank" rel="noreferrer">Fair Work Ombudsman: Redundancy pay</a>.</li>
+            <li><a href="https://www.fairwork.gov.au/ending-employment/redundancy/who-doesnt-get-redundancy-pay" target="_blank" rel="noreferrer">Fair Work Ombudsman: Who does not get redundancy pay</a>.</li>
+            <li><a href="https://www.fairwork.gov.au/ending-employment/unfair-dismissal" target="_blank" rel="noreferrer">Fair Work Ombudsman: Unfair dismissal</a>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer class="footer">
+        Built as a training draft for HR use. Review against company policy, applicable instruments, leadership guidance, and legal advice before rollout.
+      </footer>
+    </main>
+  </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
-    const currency = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
-    const number = new Intl.NumberFormat('en-AU', { maximumFractionDigits: 2 });
+    const modules = Array.from(document.querySelectorAll(".module"));
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const lessonTabs = Array.from(document.querySelectorAll(".lesson-tab"));
+    const lessonPanels = Array.from(document.querySelectorAll(".lesson-panel"));
+    const quizBlocks = Array.from(document.querySelectorAll("[data-quiz]"));
+    const quizState = new Map();
+    const serviceYears = document.getElementById("serviceYears");
+    const weeklyBasePay = document.getElementById("weeklyBasePay");
+    const eligibleStatus = document.getElementById("eligibleStatus");
+    const calcResult = document.getElementById("calcResult");
 
-    const defaults = {
-      mode: 'hourly', actualHourly: 29.70, actualSalary: 64152, employmentType: 'fulltime', ordinaryHours: 38, weeksPerYear: 52,
-      awardHourly: 29.70, superIncluded: false, superRate: 12, applyCasualLoading: false, casualLoadingRate: 25,
-      includeLeaveLoading: true, proRataLeaveLoading: true, overtimeHours: 2, overtimeRule: 'timehalf', customOtMultiplier: 1.75,
-      saturdayHours: 0, saturdayMultiplier: 1.5, saturdayTreatment: 'absorbed', sundayHours: 0, sundayMultiplier: 2, sundayTreatment: 'absorbed',
-      publicHolidayHours: 0, publicHolidayMultiplier: 2.5, publicHolidayTreatment: 'absorbed', includeAllowances: false
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+        }
+      });
+      updateProgress();
+    }, { threshold: 0.28 });
+
+    modules.forEach((module) => observer.observe(module));
+    window.addEventListener("scroll", updateProgress, { passive: true });
+
+    function updateProgress() {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - window.innerHeight;
+      const percent = scrollable > 0 ? Math.round((window.scrollY / scrollable) * 100) : 0;
+      progressFill.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+      progressText.textContent = `${Math.min(100, Math.max(0, percent))}%`;
+    }
+
+    lessonTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const lessonId = tab.dataset.lesson;
+        lessonTabs.forEach((item) => {
+          const isActive = item === tab;
+          item.classList.toggle("active", isActive);
+          item.setAttribute("aria-selected", String(isActive));
+        });
+        lessonPanels.forEach((panel) => {
+          panel.classList.toggle("active", panel.id === lessonId);
+        });
+      });
+    });
+
+    lessonPanels.forEach((panel) => {
+      const button = document.createElement("button");
+      button.className = "button complete-lesson";
+      button.type = "button";
+      button.textContent = "Mark module complete";
+      button.addEventListener("click", () => {
+        const tab = lessonTabs.find((item) => item.dataset.lesson === panel.id);
+        if (tab) {
+          tab.classList.add("completed");
+        }
+        button.textContent = "Module complete";
+        button.disabled = true;
+      });
+      panel.appendChild(button);
+    });
+
+    quizBlocks.forEach((block, index) => {
+      const options = Array.from(block.querySelectorAll(".quiz-option"));
+      const feedback = block.querySelector(".quiz-feedback");
+      options.forEach((option) => {
+        option.addEventListener("click", () => {
+          const isCorrect = option.dataset.correct === "true";
+          options.forEach((item) => {
+            item.classList.remove("correct", "incorrect");
+            item.disabled = true;
+          });
+          option.classList.add(isCorrect ? "correct" : "incorrect");
+          const correctOption = options.find((item) => item.dataset.correct === "true");
+          if (correctOption) {
+            correctOption.classList.add("correct");
+          }
+          quizState.set(index, isCorrect);
+          const answered = quizState.size;
+          const correct = Array.from(quizState.values()).filter(Boolean).length;
+          feedback.innerHTML = `<strong>${isCorrect ? "Correct." : "Review this."}</strong> ${option.dataset.feedback}<span class="mini-score">Module quiz score: ${correct}/${answered} answered correctly</span>`;
+        });
+      });
+    });
+
+    function getRedundancyWeeks(years) {
+      if (years < 1) return 0;
+      if (years < 2) return 4;
+      if (years < 3) return 6;
+      if (years < 4) return 7;
+      if (years < 5) return 8;
+      if (years < 6) return 10;
+      if (years < 7) return 11;
+      if (years < 8) return 13;
+      if (years < 9) return 14;
+      if (years < 10) return 16;
+      return 12;
+    }
+
+    function updateCalculator() {
+      if (!serviceYears || !weeklyBasePay || !eligibleStatus || !calcResult) return;
+      const years = Number(serviceYears.value || 0);
+      const weeklyPay = Number(weeklyBasePay.value || 0);
+      const status = eligibleStatus.value;
+      const weeks = getRedundancyWeeks(years);
+      const estimate = weeks * weeklyPay;
+      const messages = {
+        under12: "This scenario is generally not entitled to NES redundancy pay because the employee has less than 12 months continuous service. They may still be entitled to notice and other final pay.",
+        small: "Most small business employers do not pay redundancy pay under the NES, but downsizing and industry-specific scheme exceptions can apply. Check before confirming.",
+        casual: "Casual employees are listed by Fair Work as employees who do not get redundancy pay.",
+        fixed: "Employees engaged for a specific period, project, or season may not receive redundancy pay under the NES.",
+        award: "An award or enterprise agreement may provide different redundancy rules or entitlements. Check that instrument before relying on the NES table."
+      };
+      if (status !== "eligible") {
+        calcResult.innerHTML = `<strong>Check before paying.</strong>${messages[status]}`;
+        return;
+      }
+      calcResult.innerHTML = `<strong>Learning estimate: ${weeks} weeks</strong>Based on ${years} completed year(s) and weekly base pay of $${weeklyPay.toLocaleString()}, the NES table estimate is $${estimate.toLocaleString()}. This excludes notice, unused leave, long service leave, and any award/agreement differences.`;
+    }
+
+    [serviceYears, weeklyBasePay, eligibleStatus].forEach((item) => {
+      if (item) item.addEventListener("input", updateCalculator);
+    });
+    updateCalculator();
+
+    function updateMatrixTotals() {
+      const rows = Array.from(document.querySelectorAll(".matrix-table tbody tr")).slice(0, 5);
+      const totals = [0, 0, 0];
+      let totalWeight = 0;
+      rows.forEach((row, rowIndex) => {
+        const weight = Number(row.querySelector(".weight-input")?.value || 0) / 100;
+        totalWeight += weight * 100;
+        const scoreInputs = Array.from(row.querySelectorAll("td:nth-child(n+4):nth-child(-n+6) input"));
+        scoreInputs.forEach((input, colIndex) => {
+          totals[colIndex] += Number(input.value || 0) * weight;
+        });
+      });
+      ["matrixA", "matrixB", "matrixC"].forEach((id, index) => {
+        const cell = document.getElementById(id);
+        if (cell) cell.textContent = `${totals[index].toFixed(2)} / 5`;
+      });
+      const status = document.getElementById("matrixWeightStatus");
+      const summary = document.getElementById("matrixStatus");
+      const weightText = `Current total weighting: ${Math.round(totalWeight)}%.`;
+      if (status) status.textContent = `${weightText} Higher score may indicate stronger fit, but review all evidence and risk flags before deciding.`;
+      if (summary) summary.textContent = totalWeight === 100
+        ? "Weights add to 100%. You can still edit criteria, evidence, risk notes, and employee scores."
+        : `${weightText} Adjust the weights so they add to 100% before relying on the result.`;
+    }
+
+    document.querySelectorAll(".matrix-table input, .matrix-table textarea").forEach((input) => {
+      input.addEventListener("input", updateMatrixTotals);
+    });
+
+    const suggestedCriteria = [
+      ["Essential technical skills for future role", 25, "Qualifications, system records, work samples, role requirements", [4, 3, 5], "Use evidence, not manager impression. Score 0-5."],
+      ["Capability against future operating model", 25, "Documented examples, project work, systems capability, role mapping", [3, 4, 4], "Explain how the future role differs from the current role."],
+      ["Relevant experience and knowledge", 20, "Role history, documented projects, cross-functional knowledge", [5, 3, 3], "Avoid “last in, first out” as a shortcut."],
+      ["Objectively evidenced performance", 20, "Recent documented reviews, objective KPIs, quality data", [3, 4, 3], "Do not use vague behaviour concerns. Check consistency."],
+      ["Required licences, qualifications, or compliance capability", 10, "Licence register, training records, compliance requirements", [5, 5, 4], "Only include if genuinely required for the future role."]
+    ];
+
+    function populateMatrix(rows) {
+      const tableRows = Array.from(document.querySelectorAll(".matrix-table tbody tr")).slice(0, 5);
+      tableRows.forEach((row, index) => {
+        const data = rows[index];
+        row.querySelector(".criterion-input").value = data[0];
+        row.querySelector(".weight-input").value = data[1];
+        row.querySelector("td:nth-child(3) textarea").value = data[2];
+        const scores = Array.from(row.querySelectorAll("td:nth-child(n+4):nth-child(-n+6) input"));
+        scores.forEach((input, scoreIndex) => input.value = data[3][scoreIndex]);
+        row.querySelector("td:nth-child(7) textarea").value = data[4];
+      });
+      updateMatrixTotals();
+    }
+
+    document.getElementById("useSuggestedCriteria")?.addEventListener("click", () => {
+      populateMatrix(suggestedCriteria);
+    });
+
+    document.getElementById("startCustomCriteria")?.addEventListener("click", () => {
+      populateMatrix([
+        ["", 20, "", [0, 0, 0], ""],
+        ["", 20, "", [0, 0, 0], ""],
+        ["", 20, "", [0, 0, 0], ""],
+        ["", 20, "", [0, 0, 0], ""],
+        ["", 20, "", [0, 0, 0], ""]
+      ]);
+    });
+    updateMatrixTotals();
+
+    document.querySelectorAll(".copy-card").forEach((card) => {
+      const button = card.querySelector(".copy-button");
+      const text = card.querySelector("pre")?.textContent || "";
+      button?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          button.textContent = "Copied";
+          setTimeout(() => button.textContent = "Copy", 1400);
+        } catch {
+          button.textContent = "Select text";
+          setTimeout(() => button.textContent = "Copy", 1800);
+        }
+      });
+    });
+
+    const treeStage = document.getElementById("treeStage");
+    const treeActions = document.getElementById("treeActions");
+    const treeHistory = document.getElementById("treeHistory");
+    const treePath = [];
+    const decisionTree = {
+      start: {
+        label: "Step 1",
+        title: "Is there a genuine operational reason for the proposed change?",
+        body: "Examples include restructure, reduced work volume, technology change, relocation, closure, merger, insolvency, or the business no longer needing this role in the future structure.",
+        yes: "job-required",
+        no: "pause-operational"
+      },
+      "job-required": {
+        label: "Step 2",
+        title: "Will the employee's job still need to be done by someone?",
+        body: "A redundancy is high risk if the same job still needs to be done by someone else. Focus on whether the job itself is no longer required, not whether this particular employee should leave.",
+        yes: "pause-job-still-required",
+        no: "award-check"
+      },
+      "award-check": {
+        label: "Step 3",
+        title: "Have you checked the award, enterprise agreement, contract, and company policy?",
+        body: "Awards and enterprise agreements have consultation processes for major workplace change. Agreements or industry awards may also have redundancy rules that differ from the NES.",
+        yes: "multiple-employees",
+        no: "pause-award"
+      },
+      "multiple-employees": {
+        label: "Step 4",
+        title: "Are there multiple employees in the same or substantially similar role?",
+        body: "If yes, you need a fair selection method. Use objective, evidence-based criteria such as skills, capability against the future role, experience, qualifications, and documented performance.",
+        yes: "selection-required",
+        no: "redeployment"
+      },
+      "selection-required": {
+        label: "Selection action",
+        title: "Use the skills and competency matrix before moving forward.",
+        body: "Define future role requirements, choose objective criteria, weight them, identify evidence sources, score consistently, and check discrimination risk. Do not use age, protected attributes, unsupported manager preference, or risky shortcuts such as attendance without advice.",
+        yesLabel: "Matrix completed",
+        yes: "redeployment",
+        noLabel: "Need to pause",
+        no: "pause-selection"
+      },
+      redeployment: {
+        label: "Step 5",
+        title: "Could reasonable redeployment be available?",
+        body: "Check roles in the employer's business and associated entities where relevant. Do not assume the employee would not accept a lower-paid, different-location, or slightly different role without discussing it.",
+        yes: "redeploy-discuss",
+        no: "company-size"
+      },
+      "redeploy-discuss": {
+        label: "Redeployment action",
+        title: "Discuss the role or roles with the employee during consultation.",
+        body: "Record the vacancy review, employee preferences, suitability assessment, and decision-maker consideration. If redeployment is reasonable, the dismissal may not be a genuine redundancy.",
+        yesLabel: "Redeployment assessed",
+        yes: "company-size",
+        noLabel: "Need to pause",
+        no: "pause-redeployment"
+      },
+      "company-size": {
+        label: "Step 6",
+        title: "Does the employer have 15 or more employees at the relevant time?",
+        body: "This question helps assess NES redundancy pay. For small business status, count employees at the time of redundancy, including the employees being made redundant, regular and systematic casuals, and employees of associated entities. Small business exceptions can still apply.",
+        yes: "service-12-months",
+        no: "small-business"
+      },
+      "small-business": {
+        label: "Small business check",
+        title: "Small business: NES redundancy pay may not apply, but do not skip the process.",
+        body: "Most small businesses with fewer than 15 employees do not pay NES redundancy pay. Still check award/agreement industry schemes, downsizing/liquidation exceptions, notice, final pay, consultation obligations, contract, policy, and other dismissal risks.",
+        yesLabel: "Continue checks",
+        yes: "service-12-months",
+        noLabel: "Need advice",
+        no: "pause-small-business"
+      },
+      "service-12-months": {
+        label: "Step 7",
+        title: "Has the employee completed at least 12 months of continuous service?",
+        body: "Employees with less than 12 months' continuous service generally do not receive NES redundancy pay. This does not automatically mean the employer can terminate without process. Check notice, contract, policy, award/agreement, discrimination, general protections, and unfair dismissal eligibility rules.",
+        yes: "pay-calc",
+        no: "under-12"
+      },
+      "under-12": {
+        label: "Under 12 months",
+        title: "No NES redundancy pay is likely, but termination still needs care.",
+        body: "If the employee is under 12 months, including during probation, do not treat this as a shortcut. Confirm notice, final pay, contract, policy, award/agreement, and protected reason risks. Unfair dismissal eligibility is generally 6 months, or 12 months for a small business, but other claims may still be available.",
+        yesLabel: "Continue process",
+        yes: "services-australia",
+        noLabel: "Need advice",
+        no: "pause-under-12"
+      },
+      "pay-calc": {
+        label: "Pay check",
+        title: "Calculate redundancy pay, notice, and final pay separately.",
+        body: "Use the NES table as the minimum starting point, then check awards, agreements, contracts, company policy, small business exceptions, and industry schemes. Redundancy pay is separate from notice, unused leave, and other final pay items.",
+        yesLabel: "Pay estimate ready",
+        yes: "services-australia",
+        noLabel: "Need payroll/legal check",
+        no: "pause-pay"
+      },
+      "services-australia": {
+        label: "Step 8",
+        title: "Is the business considering making 15 or more employees redundant?",
+        body: "If 15 or more employees may be made redundant, Fair Work says the employer must notify Services Australia in writing before dismissals. This is different from the 15-employee small business threshold.",
+        yes: "services-notify",
+        no: "consultation"
+      },
+      "services-notify": {
+        label: "Notification action",
+        title: "Prepare Services Australia written notification before dismissals.",
+        body: "The notice should include the reason for the dismissals, number and categories of employees likely to be affected, and timing. Do this before employees are made redundant.",
+        yesLabel: "Notification handled",
+        yes: "consultation",
+        noLabel: "Need to pause",
+        no: "pause-services"
+      },
+      consultation: {
+        label: "Step 9",
+        title: "Has the employee been notified of the proposed change and given a real chance to respond?",
+        body: "Consultation should include clear information about the proposed change, expected effects, ways to reduce negative impact, employee questions, feedback, alternatives, and redeployment.",
+        yes: "feedback-considered",
+        no: "pause-consult"
+      },
+      "feedback-considered": {
+        label: "Step 10",
+        title: "Has the decision-maker genuinely considered the employee's feedback before final confirmation?",
+        body: "Do not just write 'feedback noted'. Record what was raised, who considered it, whether it changed the outcome, and why.",
+        yes: "ready-final",
+        no: "pause-feedback"
+      },
+      "ready-final": {
+        label: "Ready for outcome",
+        title: "Proceed to final outcome meeting if the redundancy is still going ahead.",
+        body: "Confirm the final decision in writing, explain notice and pay, provide support options, complete exit steps, and keep the file. This is still not legal advice; unusual facts should be reviewed.",
+        end: true
+      },
+      "pause-operational": { label: "Pause", title: "Do not proceed as redundancy yet.", body: "Clarify the business reason. If the concern is performance, conduct, personality, or manager preference, use the appropriate process instead.", end: true },
+      "pause-job-still-required": { label: "Pause", title: "High risk: the job still needs to be done.", body: "If someone still needs to perform the same job, the dismissal may not be a genuine redundancy. Get HR/legal advice before proceeding.", end: true },
+      "pause-award": { label: "Pause", title: "Check the instrument before consultation.", body: "Awards and enterprise agreements may dictate consultation steps, representatives, timing, dispute processes, or redundancy entitlements.", end: true },
+      "pause-selection": { label: "Pause", title: "Selection process is not ready.", body: "Build the selection matrix and evidence base before deciding which employee is affected.", end: true },
+      "pause-redeployment": { label: "Pause", title: "Redeployment has not been assessed.", body: "Reasonable redeployment can prevent a dismissal from being a genuine redundancy. Review roles and discuss options before confirming an outcome.", end: true },
+      "pause-small-business": { label: "Pause", title: "Small business exception needs advice.", body: "Check industry-specific schemes, downsizing/liquidation exceptions, notice, final pay, consultation, contract, and policy obligations.", end: true },
+      "pause-under-12": { label: "Pause", title: "Under 12 months/probation still needs checks.", body: "Do not assume probation means no risk. Check notice, contract, policy, award/agreement, discrimination, general protections, and any minimum employment period issues.", end: true },
+      "pause-pay": { label: "Pause", title: "Pay estimate is not ready.", body: "Check continuous service, base pay for ordinary hours, award/agreement terms, NES table, notice, unused leave, and payroll calculations.", end: true },
+      "pause-services": { label: "Pause", title: "Services Australia notification may be required.", body: "For proposed redundancies of 15 or more employees, written notification must be given before employees are made redundant.", end: true },
+      "pause-consult": { label: "Pause", title: "Consultation has not happened yet.", body: "Notify the employee of the proposed change, provide clear information, invite feedback, discuss impacts and alternatives, and consider redeployment.", end: true },
+      "pause-feedback": { label: "Pause", title: "Feedback has not been considered.", body: "The decision-maker must consider employee feedback before confirming the outcome. Document the consideration and reasons.", end: true }
     };
 
-    let mode = 'hourly';
-    let allowanceId = 0;
-
-    function val(id) { return parseFloat($(id).value) || 0; }
-    function checked(id) { return $(id).checked; }
-    function money(v) { return currency.format(isFinite(v) ? v : 0); }
-    function pct(v) { return `${number.format(v)}%`; }
-
-    function setMode(nextMode) {
-      mode = nextMode;
-      $('hourlyMode').classList.toggle('active', mode === 'hourly');
-      $('salaryMode').classList.toggle('active', mode === 'salary');
-      $('hourlyInputWrap').classList.toggle('hidden', mode !== 'hourly');
-      $('salaryInputWrap').classList.toggle('hidden', mode !== 'salary');
-      calculate();
-    }
-
-    function addAllowanceRow(data = {}) {
-      allowanceId += 1;
-      const row = document.createElement('div');
-      row.className = 'allowance-row';
-      row.dataset.allowanceId = allowanceId;
-      row.innerHTML = `
-        <div>
-          <label>Allowance name</label>
-          <input class="allowance-name" type="text" value="${data.name || 'Allowance'}" />
-        </div>
-        <div>
-          <label>Amount</label>
-          <input class="allowance-amount" type="number" min="0" step="0.01" value="${data.amount ?? 0}" />
-        </div>
-        <div>
-          <label>Frequency</label>
-          <select class="allowance-frequency">
-            <option value="hourly" ${data.frequency === 'hourly' ? 'selected' : ''}>Hourly</option>
-            <option value="weekly" ${data.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
-            <option value="annual" ${data.frequency === 'annual' ? 'selected' : ''}>Annual</option>
-          </select>
-        </div>
-        <div>
-          <label>Treatment</label>
-          <select class="allowance-treatment">
-            <option value="absorbed" ${data.treatment !== 'paidSeparate' ? 'selected' : ''}>Salary must absorb</option>
-            <option value="paidSeparate" ${data.treatment === 'paidSeparate' ? 'selected' : ''}>Paid separately</option>
-          </select>
-        </div>
-        <button type="button" class="mini-button danger remove-allowance">Remove</button>
-      `;
-      $('allowanceRows').appendChild(row);
-      row.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calculate));
-      row.querySelector('.remove-allowance').addEventListener('click', () => { row.remove(); calculate(); });
-      calculate();
-    }
-
-    function getAllowances(ordinaryHours, weeksPerYear) {
-      if (!checked('includeAllowances')) return { rows: [], total: 0, absorbed: 0, paidSeparate: 0 };
-      const rows = [...document.querySelectorAll('.allowance-row')].map(row => {
-        const name = row.querySelector('.allowance-name').value || 'Allowance';
-        const amount = parseFloat(row.querySelector('.allowance-amount').value) || 0;
-        const frequency = row.querySelector('.allowance-frequency').value;
-        const treatment = row.querySelector('.allowance-treatment').value;
-        let annual = 0;
-        if (frequency === 'hourly') annual = amount * ordinaryHours * weeksPerYear;
-        if (frequency === 'weekly') annual = amount * weeksPerYear;
-        if (frequency === 'annual') annual = amount;
-        return { name, amount, frequency, treatment, annual };
+    function renderDecisionTree(nodeId = "start") {
+      const node = decisionTree[nodeId];
+      if (!treeStage || !treeActions || !treeHistory || !node) return;
+      treeStage.innerHTML = `<p class="tree-stage-label">${node.label}</p><h3>${node.title}</h3><p>${node.body}</p>${node.end ? '<div class="tree-result">End of this path. Use the reset button to test another scenario.</div>' : ''}`;
+      treeActions.innerHTML = "";
+      if (!node.end) {
+        const yes = document.createElement("button");
+        yes.className = "button";
+        yes.type = "button";
+        yes.textContent = node.yesLabel || "Yes";
+        yes.addEventListener("click", () => {
+          treePath.push(`${node.title}: ${yes.textContent}`);
+          renderDecisionTree(node.yes);
+        });
+        const no = document.createElement("button");
+        no.className = "button dark";
+        no.type = "button";
+        no.textContent = node.noLabel || "No";
+        no.addEventListener("click", () => {
+          treePath.push(`${node.title}: ${no.textContent}`);
+          renderDecisionTree(node.no);
+        });
+        treeActions.append(yes, no);
+      }
+      const reset = document.createElement("button");
+      reset.className = "button secondary";
+      reset.type = "button";
+      reset.textContent = "Reset tree";
+      reset.addEventListener("click", () => {
+        treePath.length = 0;
+        renderDecisionTree("start");
       });
-      return {
-        rows,
-        total: rows.reduce((sum, r) => sum + r.annual, 0),
-        absorbed: rows.filter(r => r.treatment === 'absorbed').reduce((sum, r) => sum + r.annual, 0),
-        paidSeparate: rows.filter(r => r.treatment === 'paidSeparate').reduce((sum, r) => sum + r.annual, 0)
-      };
+      treeActions.append(reset);
+      treeHistory.innerHTML = `<strong>Path:</strong> ${treePath.length ? treePath.join(" -> ") : "Start the decision tree."}`;
     }
+    renderDecisionTree();
 
-    function overtimeAnnual(rate, hours, rule, customMultiplier, weeks) {
-      if (rule === 'none' || hours <= 0) return 0;
-      if (rule === 'timehalf') return rate * 1.5 * hours * weeks;
-      if (rule === 'double') return rate * 2 * hours * weeks;
-      if (rule === 'custom') return rate * customMultiplier * hours * weeks;
-      if (rule === 'first3') {
-        const first = Math.min(hours, 3);
-        const extra = Math.max(hours - 3, 0);
-        return ((rate * 1.5 * first) + (rate * 2 * extra)) * weeks;
+    const questions = [
+      {
+        prompt: "A manager says, “We already know the role is redundant. Can I just tell the employee tomorrow and finish it up by Friday?” What do you say?",
+        hint: "Look for proposed-change language, consultation, redeployment, and decision-maker consideration.",
+        keywords: ["proposed", "consult", "feedback", "redeploy", "decision", "document"],
+        model: "A strong answer explains that the employee should be told the change is proposed, not final. HR should check award or agreement consultation obligations, prepare the proposed changes letter, allow genuine feedback, discuss redeployment, document the process, and only confirm the decision after the decision-maker considers feedback."
+      },
+      {
+        prompt: "The manager says, “This employee has had performance issues anyway, so redundancy is cleaner.” What is risky about that?",
+        hint: "Separate the role from the person.",
+        keywords: ["role", "position", "performance", "person", "operational", "risk"],
+        model: "A strong answer says redundancy must be about the role no longer being required because of operational change. Using redundancy to avoid performance management is risky. Performance should not be mixed into redundancy conversations unless objectively relevant to a fair selection process and handled with care."
+      },
+      {
+        prompt: "An employee asks whether they can apply for a vacant lower-paid role. The manager thinks they would never accept it. What should HR do?",
+        hint: "Do not assume what the employee would accept.",
+        keywords: ["redeploy", "role", "discuss", "consider", "document", "assume"],
+        model: "A strong answer says HR should not assume the role is unsuitable. Discuss the vacancy with the employee, assess suitability, involve the decision-maker, consider whether redeployment is reasonable, and document the analysis and outcome."
+      },
+      {
+        prompt: "A proposed selection criterion is “most sick leave taken in the last year.” What is your response?",
+        hint: "Think discrimination risk and objective alternatives.",
+        keywords: ["discrimin", "risk", "objective", "relevant", "criteria", "attendance"],
+        model: "A strong answer flags this as high risk because it may disadvantage employees with disability, illness, caring responsibilities, or protected absences. The criterion should be replaced with objective, role-relevant criteria tied to the future operating model."
+      },
+      {
+        prompt: "When can the final redundancy decision be confirmed?",
+        hint: "Think sequence: notify, consult, consider, then confirm.",
+        keywords: ["consult", "feedback", "redeploy", "consider", "writing", "notice"],
+        model: "A strong answer says the decision can be confirmed after the employee has been notified of the proposed change, given a real opportunity to ask questions and provide feedback, redeployment has been considered, and the decision-maker has considered any feedback or alternatives. The outcome should then be confirmed in writing."
       }
-      return 0;
+    ];
+
+    const messages = document.getElementById("messages");
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("answerInput");
+    const hintButton = document.getElementById("hintButton");
+    const resetButton = document.getElementById("resetButton");
+    const scoreText = document.getElementById("scoreText");
+    let current = 0;
+    let score = 0;
+
+    function addMessage(text, type = "bot") {
+      const message = document.createElement("div");
+      message.className = `message ${type}`;
+      message.textContent = text;
+      messages.appendChild(message);
+      messages.scrollTop = messages.scrollHeight;
     }
 
-    function penaltyAnnual(rate, hours, multiplier, weeksOrAnnual, isAnnualHours) {
-      const hoursTotal = isAnnualHours ? hours : hours * weeksOrAnnual;
-      return rate * multiplier * hoursTotal;
+    function askQuestion() {
+      scoreText.textContent = `Question ${current + 1} of ${questions.length}`;
+      addMessage(questions[current].prompt, "bot");
     }
 
-    function calculate() {
-      const employmentType = $('employmentType').value;
-      const ordinaryHours = val('ordinaryHours');
-      const weeksPerYear = val('weeksPerYear');
-      const awardBase = val('awardHourly');
-      const superRate = val('superRate') / 100;
-      const casualLoadingRate = val('casualLoadingRate') / 100;
-      const applyCasual = checked('applyCasualLoading') || employmentType === 'casual';
-      if (employmentType === 'casual') $('applyCasualLoading').checked = true;
-      const awardOrdinaryRate = awardBase * (applyCasual ? (1 + casualLoadingRate) : 1);
+    function evaluateAnswer(answer) {
+      const lower = answer.toLowerCase();
+      const matched = questions[current].keywords.filter((keyword) => lower.includes(keyword));
+      if (matched.length >= 4) {
+        score += 2;
+        return "Strong";
+      }
+      if (matched.length >= 2) {
+        score += 1;
+        return "Developing";
+      }
+      return "Review recommended";
+    }
 
-      let actualAnnualBeforeSuper = 0;
-      let salaryInput = val('actualSalary');
-      let hourlyInput = val('actualHourly');
-
-      if (mode === 'hourly') {
-        actualAnnualBeforeSuper = hourlyInput * ordinaryHours * weeksPerYear;
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const answer = input.value.trim();
+      if (!answer) return;
+      addMessage(answer, "user");
+      const rating = evaluateAnswer(answer);
+      addMessage(`${rating}. ${questions[current].model}`, "feedback");
+      input.value = "";
+      current += 1;
+      if (current < questions.length) {
+        setTimeout(askQuestion, 450);
       } else {
-        actualAnnualBeforeSuper = checked('superIncluded') ? (salaryInput / (1 + superRate)) : salaryInput;
-        hourlyInput = ordinaryHours > 0 && weeksPerYear > 0 ? actualAnnualBeforeSuper / (ordinaryHours * weeksPerYear) : 0;
-      }
-
-      const estimatedSuper = actualAnnualBeforeSuper * superRate;
-      const annualRemunerationExSuper = actualAnnualBeforeSuper;
-      const annualPackageInclSuper = checked('superIncluded') && mode === 'salary' ? salaryInput : actualAnnualBeforeSuper + estimatedSuper;
-
-      const actualOvertime = overtimeAnnual(hourlyInput, val('overtimeHours'), $('overtimeRule').value, val('customOtMultiplier'), weeksPerYear);
-      const awardOvertime = overtimeAnnual(awardOrdinaryRate, val('overtimeHours'), $('overtimeRule').value, val('customOtMultiplier'), weeksPerYear);
-
-      const actualSaturday = penaltyAnnual(hourlyInput, val('saturdayHours'), val('saturdayMultiplier'), weeksPerYear, false);
-      const awardSaturday = penaltyAnnual(awardOrdinaryRate, val('saturdayHours'), val('saturdayMultiplier'), weeksPerYear, false);
-      const actualSunday = penaltyAnnual(hourlyInput, val('sundayHours'), val('sundayMultiplier'), weeksPerYear, false);
-      const awardSunday = penaltyAnnual(awardOrdinaryRate, val('sundayHours'), val('sundayMultiplier'), weeksPerYear, false);
-      const actualPH = penaltyAnnual(hourlyInput, val('publicHolidayHours'), val('publicHolidayMultiplier'), weeksPerYear, true);
-      const awardPH = penaltyAnnual(awardOrdinaryRate, val('publicHolidayHours'), val('publicHolidayMultiplier'), weeksPerYear, true);
-
-      const fullTimeLeaveHours = 152;
-      let leaveHours = fullTimeLeaveHours;
-      if (employmentType === 'parttime' && checked('proRataLeaveLoading')) leaveHours = fullTimeLeaveHours * (ordinaryHours / 38);
-      const awardLeaveLoading = checked('includeLeaveLoading') ? awardBase * 0.175 * leaveHours : 0;
-      const actualLeaveLoading = checked('includeLeaveLoading') ? hourlyInput * 0.175 * leaveHours : 0;
-
-      const awardBaseAnnual = awardOrdinaryRate * ordinaryHours * weeksPerYear;
-      const actualBaseAnnual = hourlyInput * ordinaryHours * weeksPerYear;
-      const allowances = getAllowances(ordinaryHours, weeksPerYear);
-
-      const paidSeparateAward = allowances.paidSeparate
-        + ($('saturdayTreatment').value === 'paidSeparate' ? awardSaturday : 0)
-        + ($('sundayTreatment').value === 'paidSeparate' ? awardSunday : 0)
-        + ($('publicHolidayTreatment').value === 'paidSeparate' ? awardPH : 0);
-
-      const paidSeparateActual = allowances.paidSeparate
-        + ($('saturdayTreatment').value === 'paidSeparate' ? actualSaturday : 0)
-        + ($('sundayTreatment').value === 'paidSeparate' ? actualSunday : 0)
-        + ($('publicHolidayTreatment').value === 'paidSeparate' ? actualPH : 0);
-
-      const absorbedPenaltyBenchmark = ($('saturdayTreatment').value === 'absorbed' ? awardSaturday : 0)
-        + ($('sundayTreatment').value === 'absorbed' ? awardSunday : 0)
-        + ($('publicHolidayTreatment').value === 'absorbed' ? awardPH : 0);
-
-      const totalAwardBenchmark = awardBaseAnnual + awardOvertime + awardSaturday + awardSunday + awardPH + awardLeaveLoading + allowances.total;
-      const absorptionBenchmark = awardBaseAnnual + awardOvertime + absorbedPenaltyBenchmark + awardLeaveLoading + allowances.absorbed;
-      const actualRemunerationTotal = actualBaseAnnual + actualOvertime + actualSaturday + actualSunday + actualPH + actualLeaveLoading + allowances.total;
-      const availableToAbsorb = mode === 'salary' ? annualRemunerationExSuper : actualBaseAnnual + actualOvertime + actualSaturday + actualSunday + actualPH + actualLeaveLoading + allowances.absorbed;
-      const gap = availableToAbsorb - absorptionBenchmark;
-
-      $('heroLabel').textContent = mode === 'salary' ? 'Salary excluding super' : 'Estimated annual remuneration';
-      $('heroValue').textContent = money(mode === 'salary' ? annualRemunerationExSuper : actualRemunerationTotal);
-      $('effectiveHourly').textContent = money(hourlyInput);
-      $('salaryExSuper').textContent = money(annualRemunerationExSuper);
-      $('superAmount').textContent = money(estimatedSuper);
-      $('benchmarkAnnual').textContent = money(totalAwardBenchmark);
-      $('absorbBenchmark').textContent = money(absorptionBenchmark);
-      $('gapAmount').textContent = money(gap);
-
-      const gapMetric = $('gapMetric');
-      gapMetric.className = 'metric ' + (gap >= 0 ? 'good' : 'bad');
-      const status = $('absorptionStatus');
-      if (gap >= 0) {
-        status.className = 'status good';
-        status.textContent = `Passes the simple absorption test by ${money(gap)} based on the assumptions entered.`;
-      } else {
-        status.className = 'status bad';
-        status.textContent = `Potential shortfall of ${money(Math.abs(gap))} based on the assumptions entered.`;
-      }
-
-      const rows = [
-        ['Actual base annual amount', actualBaseAnnual],
-        ['Actual overtime amount', actualOvertime],
-        ['Actual Saturday penalty amount', actualSaturday],
-        ['Actual Sunday penalty amount', actualSunday],
-        ['Actual public holiday penalty amount', actualPH],
-        ['Actual annual leave loading', actualLeaveLoading],
-        ['Allowance total', allowances.total],
-        ['Paid separately total', paidSeparateActual],
-        ['Total actual remuneration, excluding super', actualRemunerationTotal],
-        ['Annual package including estimated super', annualPackageInclSuper],
-        ['Award ordinary benchmark', awardBaseAnnual],
-        ['Award overtime benchmark', awardOvertime],
-        ['Award penalty benchmark', awardSaturday + awardSunday + awardPH],
-        ['Award annual leave loading', awardLeaveLoading],
-        ['Award allowances benchmark', allowances.total],
-        ['Total award/minimum benchmark', totalAwardBenchmark],
-        ['Absorption benchmark', absorptionBenchmark]
-      ];
-      $('breakdown').innerHTML = rows.map(([label, value]) => `<div class="breakdown-row"><span>${label}</span><strong>${money(value)}</strong></div>`).join('');
-
-      const otText = $('overtimeRule').selectedOptions[0].text;
-      const allowanceText = allowances.rows.length
-        ? allowances.rows.map(r => `${r.name}: ${money(r.amount)} ${r.frequency}, ${r.treatment === 'absorbed' ? 'to be absorbed by salary' : 'paid separately'} (${money(r.annual)} annually)`).join('; ')
-        : 'No allowances included.';
-      const leaveText = checked('includeLeaveLoading') ? `Annual leave loading included at 17.5% of ${number.format(leaveHours)} hours.` : 'Annual leave loading not included.';
-      $('summaryText').value = `Pay comparison summary\n\nEmployment type: ${$('employmentType').selectedOptions[0].text}. Ordinary hours: ${number.format(ordinaryHours)} per week over ${number.format(weeksPerYear)} weeks. Calculation mode: ${mode === 'salary' ? 'salary to hourly' : 'hourly to salary'}.\n\nActual/proposed rate: ${money(hourlyInput)} per hour. Salary excluding super: ${money(annualRemunerationExSuper)}. Estimated super at ${pct(val('superRate'))}: ${money(estimatedSuper)}.\n\nAward/minimum base rate entered: ${money(awardBase)} per hour${applyCasual ? `, with casual loading of ${pct(val('casualLoadingRate'))} applied to the award benchmark` : ''}. Overtime assumption: ${number.format(val('overtimeHours'))} hours per week, ${otText}. Saturday: ${number.format(val('saturdayHours'))} hours/week at ${number.format(val('saturdayMultiplier'))}x. Sunday: ${number.format(val('sundayHours'))} hours/week at ${number.format(val('sundayMultiplier'))}x. Public holiday: ${number.format(val('publicHolidayHours'))} hours/year at ${number.format(val('publicHolidayMultiplier'))}x. ${leaveText}\n\nAllowances: ${allowanceText}\n\nCalculated award/minimum benchmark: ${money(totalAwardBenchmark)}. Amount required to be absorbed by salary/remuneration: ${money(absorptionBenchmark)}. Available amount for absorption: ${money(availableToAbsorb)}. Result: ${gap >= 0 ? `surplus of ${money(gap)}` : `potential shortfall of ${money(Math.abs(gap))}`} based on the assumptions entered.\n\nImportant: This is a calculation aid only and does not determine award coverage, classification, all applicable penalties/allowances, annualised wage clause requirements, set-off validity, NES compliance, or legal obligations.`;
-    }
-
-    function resetDefaults() {
-      setMode(defaults.mode);
-      Object.entries(defaults).forEach(([key, value]) => {
-        const el = $(key);
-        if (!el) return;
-        if (el.type === 'checkbox') el.checked = value;
-        else el.value = value;
-      });
-      $('allowanceRows').innerHTML = '';
-      addAllowanceRow({ name: 'Allowance', amount: 0, frequency: 'weekly', treatment: 'absorbed' });
-      $('allowanceArea').classList.toggle('hidden', !checked('includeAllowances'));
-      $('customOtWrap').classList.toggle('hidden', $('overtimeRule').value !== 'custom');
-      calculate();
-    }
-
-    $('hourlyMode').addEventListener('click', () => setMode('hourly'));
-    $('salaryMode').addEventListener('click', () => setMode('salary'));
-    $('addAllowance').addEventListener('click', () => addAllowanceRow({ name: 'Allowance', amount: 0, frequency: 'weekly', treatment: 'absorbed' }));
-    $('includeAllowances').addEventListener('change', () => {
-      $('allowanceArea').classList.toggle('hidden', !checked('includeAllowances'));
-      if (checked('includeAllowances') && !document.querySelector('.allowance-row')) addAllowanceRow({ name: 'Allowance', amount: 0, frequency: 'weekly', treatment: 'absorbed' });
-      calculate();
-    });
-    $('overtimeRule').addEventListener('change', () => { $('customOtWrap').classList.toggle('hidden', $('overtimeRule').value !== 'custom'); calculate(); });
-    $('employmentType').addEventListener('change', () => {
-      if ($('employmentType').value === 'fulltime') $('ordinaryHours').value = 38;
-      if ($('employmentType').value === 'casual') $('applyCasualLoading').checked = true;
-      calculate();
-    });
-    $('copySummary').addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText($('summaryText').value);
-        $('copySummary').textContent = 'Copied';
-        setTimeout(() => $('copySummary').textContent = 'Copy summary', 1500);
-      } catch (e) {
-        $('summaryText').select();
-        document.execCommand('copy');
+        const max = questions.length * 2;
+        const result = score >= 8 ? "ready to apply the process with normal supervision" : score >= 5 ? "close, with a few areas to review before supporting a live matter" : "not yet ready to support a live matter without further guidance";
+        scoreText.textContent = `Score ${score}/${max}`;
+        setTimeout(() => addMessage(`Knowledge check complete. Score: ${score}/${max}. Learner is ${result}.`, "bot"), 450);
       }
     });
-    $('resetDefaults').addEventListener('click', resetDefaults);
-    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calculate));
 
-    addAllowanceRow({ name: 'Allowance', amount: 0, frequency: 'weekly', treatment: 'absorbed' });
-    $('allowanceArea').classList.add('hidden');
-    calculate();
+    hintButton.addEventListener("click", () => {
+      if (current < questions.length) {
+        addMessage(`Hint: ${questions[current].hint}`, "bot");
+      }
+    });
+
+    resetButton.addEventListener("click", () => {
+      current = 0;
+      score = 0;
+      messages.innerHTML = "";
+      input.value = "";
+      askQuestion();
+    });
+
+    askQuestion();
+    updateProgress();
   </script>
 </body>
 </html>
